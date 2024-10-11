@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import dotnev from 'dotenv';
+import serverless from 'serverless-http';
 import getSupabase from './config/database';
 import AuthRoutes from './routes/Auth.routes';
 
@@ -23,10 +24,12 @@ router.get('/', async (_, res) => {
     res.json({ message: 'Hello World!', data });
 });
 
-const server = http.createServer(app);
-const PORT = +(process.env.PORT || 3000);
-const HOST_NAME = process.env.HOST_NAME || 'localhost';
+export const handler = serverless(app);
 
-server.listen(PORT, HOST_NAME, () => {
-    console.log(`Server listening on port http://${HOST_NAME}:${PORT}`);
-});
+// const server = http.createServer(app);
+// const PORT = +(process.env.PORT || 3000);
+// const HOST_NAME = process.env.HOST_NAME || 'localhost';
+
+// server.listen(PORT, HOST_NAME, () => {
+//     console.log(`Server listening on port http://${HOST_NAME}:${PORT}`);
+// });
