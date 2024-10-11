@@ -1,8 +1,8 @@
 import express from 'express';
-import http from 'http';
+// import http from 'http';
 import cors from 'cors';
 import dotnev from 'dotenv';
-// import getSupabase from './config/database';
+import serverless from "serverless-http";
 import AuthRoutes from './routes/Auth.routes';
 
 dotnev.config();
@@ -22,9 +22,11 @@ app.get('/', async (_, res) => {
     res.json({ message: 'Festivente!' });
 });
 
-const server = http.createServer(app);
-const PORT = +(process.env.PORT || 3000);
+export const handler = serverless(app);
 
-server.listen(PORT, () => {
-    console.log(`Server listening on port http://localhost:${PORT}`);
-});
+// const server = http.createServer(app);
+// const PORT = +(process.env.PORT || 3000);
+
+// server.listen(PORT, () => {
+//     console.log(`Server listening on port http://localhost:${PORT}`);
+// });
