@@ -2,12 +2,12 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import dotnev from 'dotenv';
-import getSupabase from './config/database';
+// import getSupabase from './config/database';
 import AuthRoutes from './routes/Auth.routes';
 
 dotnev.config();
 
-const supabase = getSupabase();
+// const supabase = getSupabase();
 const app = express();
 const router = express.Router();
 
@@ -18,9 +18,8 @@ app.use('/api', router);
 
 router.use('/auth', AuthRoutes);
 
-router.get('/', async (_, res) => {
-    const { data, error } = await supabase.from('countries').select();
-    res.json({ message: 'Hello World!', data });
+app.get('/', async (_, res) => {
+    res.json({ message: 'Festivente!' });
 });
 
 const server = http.createServer(app);
