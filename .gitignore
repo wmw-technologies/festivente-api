@@ -19,5 +19,3 @@ yarn-error.log*
 # Environmental variables
 .env
 .env.test
-# Local Netlify folder
-.netlify
