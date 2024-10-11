@@ -19,3 +19,16 @@
   #  publish = "dist" # Folder with the static content for _redirect file
 
   ## more info on configuring this file: https://ntl.fyi/file-based-build-config
+
+[build]
+  command = "npm run build"
+  functions = "netlify/functions"
+  publish = ""
+[functions]
+  external_node_modules = ["express"]
+  node_bundler = "esbuild"
+[[redirects]]
+  force = true
+  from = "/api/*"
+  status = 200
+  to = "/.netlify/functions/api/:splat"
