@@ -25,8 +25,7 @@ router.get('/', async (_, res) => {
 
 const server = http.createServer(app);
 const PORT = +(process.env.PORT || 3000);
-const HOST_NAME = process.env.HOST_NAME || 'localhost';
 
-server.listen(PORT, HOST_NAME, () => {
-    console.log(`Server listening on port http://${HOST_NAME}:${PORT}`);
+server.listen(PORT, () => {
+    console.log(`Server listening on port http://localhost:${PORT}`);
 });
