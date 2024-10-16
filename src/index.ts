@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import AuthRoutes from './routes/Auth.routes';
+import UserRoutes from './routes/User.routes';
 
 const app = express();
 const router = express.Router();
@@ -16,6 +17,7 @@ app.get('/', async (_, res) => {
 });
 
 router.use('/auth', AuthRoutes);
+router.use('/user', UserRoutes);
 
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
