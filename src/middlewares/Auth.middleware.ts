@@ -3,7 +3,6 @@ import { NextFunction, Response } from 'express';
 import User from '../models/User.model';
 
 async function authentication(req: any, res: Response, next: NextFunction) {
-  console.log('authentication');
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
     res.status(401).json({ error: 'Access denied' });
