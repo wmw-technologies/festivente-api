@@ -2,12 +2,11 @@ import { Request, Response } from 'express';
 import Role from '../models/Role.model';
 
 export default class RoleController {
-  static async get(req: Request, res: Response) {
+  static async list(_: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
-      const response = await Role.findById(id);
+      const response = await Role.find();
 
-      res.status(200).json({ message: 'Role created', data: response });
+      res.status(200).json({ data: response, message: 'Udało się pobrać listę użytkowników :)' });
     } catch (err) {
       res.status(500).json({ message: 'Internal server error' });
     }
@@ -19,7 +18,7 @@ export default class RoleController {
 
       const existingRole = await Role.findOne({ name });
       if (existingRole) {
-        res.status(400).json({ message: 'Role already exists' });
+        res.status(400).json({ message: 'Rola o podanej nazwie już istnieje' });
         return;
       }
 
@@ -50,11 +49,12 @@ export default class RoleController {
     }
   }
 
-  static async list(_: Request, res: Response): Promise<void> {
+  static async get(req: Request, res: Response) {
     try {
-      const response = await Role.find();
+      const { id } = req.params;
+      const response = await Role.findById(id);
 
-      res.status(200).json({ data: response, message: 'Udało się pobrać listę użytkowników :)' });
+      res.status(200).json({ message: 'Udało się pobrać rolę', data: response });
     } catch (err) {
       res.status(500).json({ message: 'Internal server error' });
     }
