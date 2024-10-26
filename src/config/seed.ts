@@ -1,10 +1,23 @@
 import Role from '../models/Role.model';
+import Permissions from '../permissions';
 
 async function seedRoles() {
   try {
     const roles = [
-      { name: 'admin', permissions: ['create', 'read', 'update', 'delete'] },
-      { name: 'user', permissions: ['read'] },
+      {
+        name: 'Admin',
+        permissions: [
+          Permissions.ADMINISTRATION.ACCESS,
+          Permissions.EMPLOYEES.ACCESS,
+          Permissions.EVENTS.ACCESS,
+          Permissions.RENTALS.ACCESS,
+          Permissions.SERVICE.ACCESS,
+          Permissions.TRANSPORT.ACCESS,
+          Permissions.WAREHOUSE.ACCESS,
+          Permissions.WAREHOUSE.ADD,
+        ],
+      },
+      { name: 'Użytkownik', permissions: [] },
     ];
 
     for (const role of roles) {
