@@ -98,11 +98,36 @@ export default class UserController {
         return;
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const response = await User.findByIdAndUpdate(id, { first_name, last_name, phone, role, password: hashedPassword }, { new: true });
+      const response = await User.findByIdAndUpdate(id, { first_name, last_name, phone, role }, { new: true });
 
       res.status(200).json({ message: 'User updated', data: response });
+    } catch (err) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+
+  static async updatePassword(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { password, confirm_password } = req.body;
+
+      if (password !== confirm_password) {
+        res.status(400).json({ errors: { confirm_password: 'Passwords do not match' }, message: 'Passwords do not match' });
+        return;
+      }
+
+      const user = await User.findById(id);
+
+      if (!user) {
+        res.status(400).json({ message: 'User does not exist' });
+        return;
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      const response = await User.findByIdAndUpdate(id, { password: passwordHash }, { new: true });
+
+      res.status(200).json({ message: 'Hasło użytkownika zostało zaktualizwane', data: response });
     } catch (err) {
       res.status(500).json({ message: 'Internal server error' });
     }
