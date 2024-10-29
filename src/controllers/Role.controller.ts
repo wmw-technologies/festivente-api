@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Role from '../models/Role.model';
+import { StatusCodes } from 'http-status-codes';
 
 export default class RoleController {
   static async list(_: Request, res: Response): Promise<void> {
@@ -8,7 +9,7 @@ export default class RoleController {
 
       res.status(200).json({ data: response, message: 'Udało się pobrać listę użytkowników :)' });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 
@@ -26,7 +27,7 @@ export default class RoleController {
 
       res.status(201).json({ message: 'Udało się stworzyć nową rolę', data: response });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 
@@ -45,7 +46,7 @@ export default class RoleController {
 
       res.status(200).json({ message: 'Rola została zakutalizowana', data: response });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 
@@ -56,7 +57,7 @@ export default class RoleController {
 
       res.status(200).json({ message: 'Udało się pobrać rolę', data: response });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 }

@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import User from '../models/User.model';
 import Role from '../models/Role.model';
+import { StatusCodes } from 'http-status-codes';
 
 export default class UserController {
   static async me(req: any, res: Response): Promise<void> {
@@ -10,7 +11,7 @@ export default class UserController {
 
       res.json({ message: 'User fetched', data: user });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 
@@ -20,7 +21,7 @@ export default class UserController {
 
       res.status(200).json({ data: response, message: 'Udało się pobrać listę użytkowników :)' });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 
@@ -62,7 +63,7 @@ export default class UserController {
 
       res.status(201).json({ message: 'User created' });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 
@@ -102,7 +103,7 @@ export default class UserController {
 
       res.status(200).json({ message: 'User updated', data: response });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 
@@ -129,7 +130,7 @@ export default class UserController {
 
       res.status(200).json({ message: 'Hasło użytkownika zostało zaktualizwane', data: response });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 
@@ -140,7 +141,7 @@ export default class UserController {
 
       res.status(200).json({ message: 'User fetched', data: response });
     } catch (err) {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
   }
 }
