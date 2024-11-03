@@ -6,6 +6,7 @@ import { seedRoles } from './config/seed';
 import AuthRoutes from './routes/Auth.routes';
 import UserRoutes from './routes/User.routes';
 import RoleRoutes from './routes/Role.routes';
+import WarehouseRoutes from './routes/Warehouse.routes';
 
 connectDB().then(() => {
   // Seed data
@@ -27,6 +28,7 @@ app.get('/', async (_, res) => {
 router.use('/auth', AuthRoutes);
 router.use('/user', UserRoutes);
 router.use('/role', RoleRoutes);
+router.use('/warehouse', WarehouseRoutes);
 
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;

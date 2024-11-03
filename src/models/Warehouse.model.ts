@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+import * as z from 'zod';
 
-const warehouseItemSchema = new mongoose.Schema(
+const schema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -9,18 +10,6 @@ const warehouseItemSchema = new mongoose.Schema(
     manufacturer: {
       type: String,
       required: false,
-    },
-    model: {
-      type: String,
-      required: false,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-    },
-    serialNumbers: {
-      type: [String],
-      required: true,
     },
     skuNumber: {
       type: String,
@@ -31,14 +20,6 @@ const warehouseItemSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    location: {
-      type: String,
-      required: false,
-    },
-    warrantyEndDate: {
-      type: Date,
-      required: false,
-    },
     category: {
       type: String,
       required: false,
@@ -47,11 +28,11 @@ const warehouseItemSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    status: {
-      type: String,
-      default: 'available', // Default status
+    items: {
+      type: Array<mongoose.Schema.Types.ObjectId>,
+      required: false,
     },
-    addedBy: {
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
@@ -62,4 +43,26 @@ const warehouseItemSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model('WarehouseItem', warehouseItemSchema);
+export default mongoose.model('Warehouse', schema);
+
+export const zodSchema = z.object({
+  name: z.string().min(3).max(64),
+  manufacturer: z.string().optional(),
+  skuNumber: z.string().min(1),
+  rentalValue: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/, { message: 'Must be a valid PLN amount (e.g., 99 or 999.99)' })
+    .transform((val) => parseFloat(val))
+    .refine((val) => val >= 0, { message: 'Amount must be positive' })
+    .refine((val) => val <= 100000, { message: 'Amount must be less than or equal to 100,000 PLN' }),
+  category: z.string().optional(),
+  description: z.string().optional(),
+  isSerialTracked: z.boolean().optional(),
+  items: z.array(
+    z.object({
+      // serialNumber: z.string().min(1).optional(),
+      location: z.string().min(1),
+      description: z.string().optional()
+    })
+  )
+});

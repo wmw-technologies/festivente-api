@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import * as z from 'zod';
 
-const userSchema = new mongoose.Schema(
+const schema = new mongoose.Schema(
   {
     first_name: String,
     last_name: String,
@@ -26,9 +26,9 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model('User', schema);
 
-export const signInSchema = z.object({
+export const zodSchema = z.object({
   email: z.string().email().trim(),
   password: z.string().min(8),
 });

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const roleSchema = new mongoose.Schema(
+const schema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -17,4 +17,4 @@ const roleSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model('Role', roleSchema);
+export default mongoose.model('Role', schema);
