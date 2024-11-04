@@ -66,9 +66,10 @@ export const zodSchema = z.object({
   isSerialTracked: z.boolean().optional(),
   devices: z.array(
     z.object({
+      _id: z.string().optional(),
       serialNumber: z.string().min(1).optional(),
       location: z.string().min(1),
-      description: z.string().optional(),
+      description: z.string().optional()
     })
   ),
 });
