@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const warehouseItemSchema = new mongoose.Schema(
+const deviceSchema = new mongoose.Schema(
   {
     serialNumber: {
       type: String,
@@ -14,10 +14,15 @@ const warehouseItemSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    warehouseId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Warehouse',
+      required: true,
+    }
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.model('WarehouseItem', warehouseItemSchema);
+export default mongoose.model('Device', deviceSchema);

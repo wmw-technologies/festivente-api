@@ -28,15 +28,26 @@ const schema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    items: {
-      type: Array<mongoose.Schema.Types.ObjectId>,
-      required: false,
+    isSerialTracked: {
+      type: Boolean,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ['Available', 'Out of stock'],
+      default: 'Out of stock',
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
+    devices: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Device',
+      },
+    ],
   },
   {
     timestamps: true,
@@ -49,20 +60,15 @@ export const zodSchema = z.object({
   name: z.string().min(3).max(64),
   manufacturer: z.string().optional(),
   skuNumber: z.string().min(1),
-  rentalValue: z
-    .string()
-    .regex(/^\d+(\.\d{1,2})?$/, { message: 'Must be a valid PLN amount (e.g., 99 or 999.99)' })
-    .transform((val) => parseFloat(val))
-    .refine((val) => val >= 0, { message: 'Amount must be positive' })
-    .refine((val) => val <= 100000, { message: 'Amount must be less than or equal to 100,000 PLN' }),
+  rentalValue: z.string().transform((val) => parseFloat(val)),
   category: z.string().optional(),
   description: z.string().optional(),
   isSerialTracked: z.boolean().optional(),
-  items: z.array(
+  devices: z.array(
     z.object({
-      // serialNumber: z.string().min(1).optional(),
+      serialNumber: z.string().min(1).optional(),
       location: z.string().min(1),
-      description: z.string().optional()
+      description: z.string().optional(),
     })
-  )
+  ),
 });
