@@ -61,7 +61,7 @@ export const zodSchema = z.object({
   manufacturer: z.string().optional(),
   skuNumber: z.string().min(1),
   rentalValue: z.string().transform((val) => parseFloat(val)),
-  category: z.string().optional(),
+  category: z.string().optional().nullable(),
   description: z.string().optional(),
   isSerialTracked: z.boolean().optional(),
   devices: z.array(
