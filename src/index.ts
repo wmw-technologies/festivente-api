@@ -7,6 +7,7 @@ import AuthRoutes from './routes/Auth.routes';
 import UserRoutes from './routes/User.routes';
 import RoleRoutes from './routes/Role.routes';
 import WarehouseRoutes from './routes/Warehouse.routes';
+import RentalsRoutes from './routes/Rentals.routes';
 import EmployeesRoutes from './routes/Employees.routes';
 
 connectDB().then(() => {
@@ -30,6 +31,7 @@ router.use('/auth', AuthRoutes);
 router.use('/user', UserRoutes);
 router.use('/role', RoleRoutes);
 router.use('/warehouse', WarehouseRoutes);
+router.use('/rentals', RentalsRoutes);
 router.use('/employees', EmployeesRoutes);
 
 const server = http.createServer(app);
