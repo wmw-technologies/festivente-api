@@ -3,11 +3,26 @@ import Role from '../models/Role.model';
 import { StatusCodes } from 'http-status-codes';
 
 export default class RoleController {
-  static async list(_: Request, res: Response): Promise<void> {
+  static async list(req: Request, res: Response): Promise<void> {
     try {
-      const response = await Role.find();
+      const { page = 1, perPage = 10, sort = '', order = 'ASC' } = req.query;
+      const totalRows = await Role.countDocuments();
+      const response = await Role.find(
+        {},
+        {},
+        {
+          skip: (parseInt(page as string) - 1) * parseInt(perPage as string),
+          limit: parseInt(perPage as string),
+        }
+      );
 
-      res.status(200).json({ data: response, message: 'Udało się pobrać listę użytkowników :)' });
+      res.status(200).json({
+        data: {
+          items: response,
+          totalRows,
+        },
+        message: 'Udało się pobrać listę użytkowników :)',
+      });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }

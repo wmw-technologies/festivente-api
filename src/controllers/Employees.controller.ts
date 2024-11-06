@@ -24,9 +24,7 @@ export default class EmployeesController {
       }
 
       const newEmployee = new Employee({ firstName, lastName, email, phone, position, dailyRate });
-      const response = await newEmployee.save().catch((err) => {
-        console.log(err);
-      });
+      const response = await newEmployee.save();
 
       res.status(StatusCodes.CREATED).json({ message: 'Pracownik został dodany', data: response });
     } catch (err) {

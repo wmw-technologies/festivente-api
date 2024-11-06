@@ -15,11 +15,27 @@ export default class UserController {
     }
   }
 
-  static async list(_: Request, res: Response): Promise<void> {
+  static async list(req: Request, res: Response): Promise<void> {
     try {
-      const response = await User.find({}, { password: 0 }).populate('role');
+      const { page = 1, perPage = 10, sort = '', order = 'ASC' } = req.query;
+      
+      const totalRows = await User.countDocuments();
+      const response = await User.find(
+        {},
+        { password: 0 },
+        {
+          skip: (parseInt(page as string) - 1) * parseInt(perPage as string),
+          limit: parseInt(perPage as string),
+        }
+      ).populate('role');
 
-      res.status(200).json({ data: response, message: 'Udało się pobrać listę użytkowników :)' });
+      res.status(200).json({
+        data: {
+          items: response,
+          totalRows,
+        },
+        message: 'Udało się pobrać listę użytkowników :)',
+      });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
