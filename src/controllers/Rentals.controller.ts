@@ -4,7 +4,6 @@ import Rental from '../models/Rentals.model';
 import Device from '../models/Device';
 
 export default class RentalsController {
-
   static async list(_: Request, res: Response): Promise<void> {
     try {
       const rentals = await Rental.find().populate('devices');
@@ -45,10 +44,7 @@ export default class RentalsController {
       });
       const response = await rental.save();
 
-      await Device.updateMany(
-        { _id: { $in: devices } },
-        { $set: { rentalId: response._id } }
-      );
+      await Device.updateMany({ _id: { $in: devices } }, { $set: { rentalId: response._id } });
 
       res.status(StatusCodes.CREATED).json({ data: response, message: 'Wypożyczenie utworzone pomyślnie' });
     } catch (err) {
@@ -89,17 +85,11 @@ export default class RentalsController {
       }
 
       if (ended) {
-        await Device.updateMany(
-          { _id: { $in: rental.devices } },
-          { $set: { rentalId: null } }
-        );
+        await Device.updateMany({ _id: { $in: rental.devices } }, { $set: { rentalId: null } });
       } else {
         const oldDevices = rental.devices || [];
 
-        await Device.updateMany(
-          { _id: { $in: oldDevices } },
-          { $set: { rentalId: null } }
-        );
+        await Device.updateMany({ _id: { $in: oldDevices } }, { $set: { rentalId: null } });
 
         const unavailableDevices = await Device.find({ _id: { $in: devices }, rentalId: { $ne: null } });
         if (unavailableDevices.length > 0) {
@@ -110,10 +100,7 @@ export default class RentalsController {
           return;
         }
 
-        await Device.updateMany(
-          { _id: { $in: devices } },
-          { $set: { rentalId: rental._id } }
-        );
+        await Device.updateMany({ _id: { $in: devices } }, { $set: { rentalId: rental._id } });
       }
 
       rental.startDate = startDate;
@@ -134,4 +121,15 @@ export default class RentalsController {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });
     }
   }
+
+  static async availableDevices(_: Request, res: Response): Promise<void> {
+    try {
+      const devices = await Device.find({ rentalId: null }).populate('warehouseId');
+
+      res.status(StatusCodes.OK).json({ data: devices, message: 'Lista dostępnych urządzeń pobrana pomyślnie' });
+    } catch (err) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });
+    }
+  }
+
 }
