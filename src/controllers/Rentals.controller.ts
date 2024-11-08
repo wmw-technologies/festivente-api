@@ -15,10 +15,21 @@ export default class RentalsController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { startDate, endDate, companyName, phone, issuedBy, receivedBy, price, discount, devices } = req.body;
+      const { startDate, endDate, companyName, phone, issuedBy, receivedBy, price, devices } = req.body;
 
       if (new Date(startDate) > new Date(endDate)) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Data rozpoczęcia nie może być późniejsza niż data zakończenia' });
+        res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Data rozpoczęcia nie może być późniejsza niż data zakończenia', errors: { rentalDate: 'Data rozpoczęcia nie może być późniejsza niż data zakończenia' } });
+        return;
+      }
+
+      const date = new Date();
+
+      if (date > new Date(startDate)) {
+        res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Data rozpoczęcia nie może być wcześniejsza niż dzisiejsza data', errors: { rentalDate: 'Data rozpoczęcia nie może być wcześniejsza niż dzisiejsza data' } });
         return;
       }
 
@@ -26,7 +37,7 @@ export default class RentalsController {
       if (unavailableDevices.length > 0) {
         res.status(StatusCodes.BAD_REQUEST).json({
           message: 'Niektóre urządzenia są już wypożyczone',
-          unavailableDevices,
+          errors: { devices: 'Niektóre urządzenia są już wypożyczone' },
         });
         return;
       }
@@ -39,7 +50,6 @@ export default class RentalsController {
         issuedBy,
         receivedBy,
         price,
-        discount,
         devices,
       });
       const response = await rental.save();
@@ -71,11 +81,31 @@ export default class RentalsController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { startDate, endDate, companyName, phone, issuedBy, receivedBy, price, discount, devices, ended } = req.body;
+      const { startDate, endDate, companyName, phone, issuedBy, receivedBy, price, devices } = req.body;
 
       if (new Date(startDate) > new Date(endDate)) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Data rozpoczęcia nie może być późniejsza niż data zakończenia' });
+        res.status(StatusCodes.BAD_REQUEST).json({
+          message: 'Data rozpoczęcia nie może być późniejsza niż data zakończenia',
+          errors: {
+            rentalDate: 'Data rozpoczęcia nie może być późniejsza niż data zakończenia',
+          },
+        });
         return;
+      }
+
+      const date = new Date();
+
+      if (date > new Date(startDate)) {
+        res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Data rozpoczęcia nie może być wcześniejsza niż dzisiejsza data', errors: { rentalDate: 'Data rozpoczęcia nie może być wcześniejsza niż dzisiejsza data' } });
+        return;
+      }
+
+      if (date > new Date(endDate)) {
+        res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: 'Data zakończenia nie może być wcześniejsza niż dzisiejsza data', errors: { returnDate: 'Data zakończenia nie może być wcześniejsza niż dzisiejsza data' } });
       }
 
       const rental = await Rental.findById(id);
@@ -84,24 +114,10 @@ export default class RentalsController {
         return;
       }
 
-      if (ended) {
-        await Device.updateMany({ _id: { $in: rental.devices } }, { $set: { rentalId: null } });
-      } else {
-        const oldDevices = rental.devices || [];
+      const oldDevices = rental.devices || [];
 
-        await Device.updateMany({ _id: { $in: oldDevices } }, { $set: { rentalId: null } });
-
-        const unavailableDevices = await Device.find({ _id: { $in: devices }, rentalId: { $ne: null } });
-        if (unavailableDevices.length > 0) {
-          res.status(StatusCodes.BAD_REQUEST).json({
-            message: 'Niektóre urządzenia są już wypożyczone',
-            unavailableDevices,
-          });
-          return;
-        }
-
-        await Device.updateMany({ _id: { $in: devices } }, { $set: { rentalId: rental._id } });
-      }
+      await Device.updateMany({ _id: { $in: oldDevices } }, { $set: { rentalId: null } });
+      await Device.updateMany({ _id: { $in: devices } }, { $set: { rentalId: rental._id } });
 
       rental.startDate = startDate;
       rental.endDate = endDate;
@@ -110,9 +126,7 @@ export default class RentalsController {
       rental.issuedBy = issuedBy;
       rental.receivedBy = receivedBy;
       rental.price = price;
-      rental.discount = discount;
       rental.devices = devices;
-      rental.ended = ended;
 
       const response = await rental.save();
 
@@ -131,5 +145,4 @@ export default class RentalsController {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });
     }
   }
-
 }
