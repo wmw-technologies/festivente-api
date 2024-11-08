@@ -17,6 +17,7 @@ export default class WarehouseController {
   static async create(req: Request, res: Response): Promise<void> {
     try {
       const { name, manufacturer, skuNumber, rentalValue, category, description, isSerialTracked, devices = [] } = req.body;
+
       const existingSkuNumber = await Warehouse.findOne({ skuNumber });
       if (existingSkuNumber) {
         res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ message: 'SkuNumber o podanym numerze już istnieje', errors: { skuNumber: 'SkuNumber o podanym numerze już istnieje' } });
@@ -130,7 +131,6 @@ export default class WarehouseController {
       }
 
       const _devices: Types.ObjectId[] = [];
-
       const exisitingDevices = existingWarehouse.devices;
 
       for (let i = 0; i < exisitingDevices.length; i++) {

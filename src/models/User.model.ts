@@ -3,14 +3,23 @@ import * as z from 'zod';
 
 const schema = new mongoose.Schema(
   {
-    first_name: String,
-    last_name: String,
+    first_name: {
+      type: String,
+      required: false,
+    },
+    last_name: {
+      type: String,
+      required: false,
+    },
     email: {
       type: String,
       required: true,
       unique: true,
     },
-    phone: String,
+    phone: {
+      type: String,
+      required: false,
+    },
     password: {
       type: String,
       required: true,
