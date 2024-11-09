@@ -5,7 +5,7 @@ import Employee from '../models/Employee.model';
 export default class EmployeesController {
   static async list(req: Request, res: Response): Promise<void> {
     try {
-      const { page = 1, perPage = 10, sort = '', order = 'ASC' } = req.query;
+      const { page = 1, perPage = 10, sort = '_id', order = 'ASC' } = req.query;
       const totalRows = await Employee.countDocuments();
       const response = await Employee.find(
         {},
