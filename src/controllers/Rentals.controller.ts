@@ -71,7 +71,13 @@ export default class RentalsController {
   static async get(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const rental = await Rental.findById(id).populate('devices');
+      const rental = await Rental.findById(id).populate({
+        path: 'devices',
+        populate: {
+          path: 'warehouseId',
+          model: 'Warehouse'
+        }
+      });;
 
       if (!rental) {
         res.status(StatusCodes.NOT_FOUND).json({ message: 'Wypożyczenie nie zostało znalezione' });
