@@ -1,13 +1,28 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { Types } from 'mongoose';
 import Employee from '../models/Employee.model';
 
 export default class EmployeesController {
-  static async list(_: Request, res: Response): Promise<void> {
+  static async list(req: Request, res: Response): Promise<void> {
     try {
-      const response = await Employee.find();
-      res.status(StatusCodes.OK).json({ data: response, message: 'Udało się pobrać dane' });
+      const { page = 1, perPage = 10, sort = '', order = 'ASC' } = req.query;
+      const totalRows = await Employee.countDocuments();
+      const response = await Employee.find(
+        {},
+        {},
+        {
+          [sort as string]: order === 'ASC' ? 1 : -1,
+          skip: (parseInt(page as string) - 1) * parseInt(perPage as string),
+          limit: parseInt(perPage as string),
+        }
+      );
+      res.status(StatusCodes.OK).json({
+        data: {
+          items: response,
+          totalRows,
+        },
+        message: 'Udało się pobrać dane',
+      });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }

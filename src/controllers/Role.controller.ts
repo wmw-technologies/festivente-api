@@ -14,7 +14,7 @@ export default class RoleController {
           skip: (parseInt(page as string) - 1) * parseInt(perPage as string),
           limit: parseInt(perPage as string),
         }
-      );
+      ).sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
 
       res.status(200).json({
         data: {

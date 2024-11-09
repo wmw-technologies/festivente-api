@@ -18,7 +18,7 @@ export default class UserController {
   static async list(req: Request, res: Response): Promise<void> {
     try {
       const { page = 1, perPage = 10, sort = '', order = 'ASC' } = req.query;
-      
+
       const totalRows = await User.countDocuments();
       const response = await User.find(
         {},
@@ -27,7 +27,9 @@ export default class UserController {
           skip: (parseInt(page as string) - 1) * parseInt(perPage as string),
           limit: parseInt(perPage as string),
         }
-      ).populate('role');
+      )
+        .populate('role')
+        .sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
 
       res.status(200).json({
         data: {

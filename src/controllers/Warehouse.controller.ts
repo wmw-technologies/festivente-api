@@ -5,10 +5,26 @@ import Warehouse from '../models/Warehouse.model';
 import Device from '../models/Device';
 
 export default class WarehouseController {
-  static async list(_: Request, res: Response): Promise<void> {
+  static async list(req: Request, res: Response): Promise<void> {
     try {
-      const response = await Warehouse.find();
-      res.status(StatusCodes.OK).json({ data: response, message: 'Warehouse items retrieved successfully' });
+      const { page = 1, perPage = 10, sort = '', order = 'ASC' } = req.query;
+      const totalRows = await Warehouse.countDocuments();
+      const response = await Warehouse.find(
+        {},
+        {},
+        {
+          skip: (parseInt(page as string) - 1) * parseInt(perPage as string),
+          limit: parseInt(perPage as string),
+        }
+      ).sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
+      
+      res.status(StatusCodes.OK).json({
+        data: {
+          items: response,
+          totalRows,
+        },
+        message: 'Warehouse items retrieved successfully',
+      });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
