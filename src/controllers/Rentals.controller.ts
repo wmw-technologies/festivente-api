@@ -1,13 +1,32 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import Rental from '../models/Rentals.model';
-import Device from '../models/Device';
+import Rental from '../models/Rental.model';
+import Device from '../models/Device.model';
 
 export default class RentalsController {
-  static async list(_: Request, res: Response): Promise<void> {
+  static async list(req: Request, res: Response): Promise<void> {
     try {
-      const rentals = await Rental.find().populate('devices');
-      res.status(StatusCodes.OK).json({ data: rentals, message: 'Lista wypożyczeń pobrana pomyślnie' });
+      const { page = 1, perPage = 10, sort = '_id', order = 'ASC' } = req.query;
+      const totalRows = await Rental.countDocuments();
+
+      const response = await Rental.find(
+        {},
+        {},
+        {
+          skip: (parseInt(page as string) - 1) * parseInt(perPage as string),
+          limit: parseInt(perPage as string),
+        }
+      )
+        .populate('devices')
+        .sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
+
+      res.status(StatusCodes.OK).json({
+        data: {
+          items: response,
+          totalRows,
+        },
+        message: 'Lista wypożyczeń pobrana pomyślnie',
+      });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });
     }

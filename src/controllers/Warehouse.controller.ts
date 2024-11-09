@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { Types } from 'mongoose';
 import Warehouse from '../models/Warehouse.model';
-import Device from '../models/Device';
+import Device from '../models/Device.model';
 
 export default class WarehouseController {
   static async list(req: Request, res: Response): Promise<void> {
