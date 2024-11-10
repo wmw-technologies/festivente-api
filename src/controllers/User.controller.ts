@@ -17,7 +17,7 @@ export default class UserController {
 
   static async list(req: Request, res: Response): Promise<void> {
     try {
-      const { page = 1, perPage = 10, sort = '_id', order = 'ASC' } = req.query;
+      const { page = 1, perPage = 9999, sort = '_id', order = 'ASC' } = req.query;
 
       const totalRows = await User.countDocuments();
       const response = await User.find(

@@ -7,8 +7,9 @@ import AuthRoutes from './routes/Auth.routes';
 import UserRoutes from './routes/User.routes';
 import RoleRoutes from './routes/Role.routes';
 import WarehouseRoutes from './routes/Warehouse.routes';
-import RentalsRoutes from './routes/Rentals.routes';
-import EmployeesRoutes from './routes/Employees.routes';
+import RentalRoutes from './routes/Rental.routes';
+import EmployeeRoutes from './routes/Employee.routes';
+import EventRoutes from './routes/Event.routes';
 
 connectDB().then(() => {
   // Seed data
@@ -31,8 +32,9 @@ router.use('/auth', AuthRoutes);
 router.use('/user', UserRoutes);
 router.use('/role', RoleRoutes);
 router.use('/warehouse', WarehouseRoutes);
-router.use('/rentals', RentalsRoutes);
-router.use('/employees', EmployeesRoutes);
+router.use('/rental', RentalRoutes);
+router.use('/employee', EmployeeRoutes);
+router.use('/event', EventRoutes);
 
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;

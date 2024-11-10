@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import EmployeesController from '../controllers/Employees.controller';
+import EmployeesController from '../controllers/Employee.controller';
 import { authentication, authorization } from '../middlewares/Auth.middleware';
 import { validate } from '../middlewares/Validation.middleware';
 import { zodSchema } from '../models/Employee.model';

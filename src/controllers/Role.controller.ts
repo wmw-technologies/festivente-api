@@ -5,7 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 export default class RoleController {
   static async list(req: Request, res: Response): Promise<void> {
     try {
-      const { page = 1, perPage = 10, sort = '_id', order = 'ASC' } = req.query;
+      const { page = 1, perPage = 9999, sort = '_id', order = 'ASC' } = req.query;
       const totalRows = await Role.countDocuments();
       const response = await Role.find(
         {},
