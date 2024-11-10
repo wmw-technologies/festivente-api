@@ -45,8 +45,6 @@ const rentalSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      // enum: ['Available', 'Out of stock'],
-      // default: 'Out of stock',
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

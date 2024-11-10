@@ -169,9 +169,16 @@ export default class RentalController {
     }
   }
 
-  static async availableDevices(_: Request, res: Response): Promise<void> {
+  static async availableDevices(req: Request, res: Response): Promise<void> {
     try {
-      const devices = await Device.find({ rentalId: null }).populate('warehouseId');
+      const { id } = req.query;
+      
+      const devices = await Device.find({
+        $or: [
+          { rentalId: null },
+          { rentalId: id }
+        ]
+      }).populate('warehouseId');
 
       res.status(StatusCodes.OK).json({ data: devices, message: 'Lista dostępnych urządzeń pobrana pomyślnie' });
     } catch (err) {

@@ -17,7 +17,7 @@ export default class WarehouseController {
           limit: parseInt(perPage as string),
         }
       ).sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
-      
+
       res.status(StatusCodes.OK).json({
         data: {
           items: response,
@@ -72,7 +72,7 @@ export default class WarehouseController {
       const _devices: Types.ObjectId[] = [];
 
       for (let i = 0; i < devices.length; i++) {
-        const item = await Device.create({ ...devices[i], warehouseId: newWarehouse._id });
+        const item = await Device.create({ ...devices[i], warehouseId: newWarehouse._id, rentalId: null });
         _devices.push(item._id);
       }
 
@@ -161,7 +161,7 @@ export default class WarehouseController {
 
       for (let i = 0; i < devices.length; i++) {
         if (!devices[i]._id) {
-          const newItem = await Device.create({ ...devices[i], warehouseId: existingWarehouse._id });
+          const newItem = await Device.create({ ...devices[i], warehouseId: existingWarehouse._id, rentalId: null });
           _devices.push(newItem._id);
         } else {
           _devices.push(devices[i]._id);
