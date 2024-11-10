@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import Rental from '../models/Rental.model';
 import Device from '../models/Device.model';
 
-export default class RentalsController {
+export default class RentalController {
   static async list(req: Request, res: Response): Promise<void> {
     try {
       const { page = 1, perPage = 9999, sort = '_id', order = 'ASC' } = req.query;

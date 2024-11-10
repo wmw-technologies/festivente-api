@@ -1,29 +1,29 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { Types } from 'mongoose';
-import Warehouse from '../models/Warehouse.model';
-import Device from '../models/Device.model';
+import Event from '../models/Event.model';
 
-export default class WarehouseController {
+export default class EventController {
   static async list(req: Request, res: Response): Promise<void> {
     try {
       const { page = 1, perPage = 9999, sort = '_id', order = 'ASC' } = req.query;
-      const totalRows = await Warehouse.countDocuments();
-      const response = await Warehouse.find(
+      const totalRows = await Event.countDocuments();
+      const response = await Event.find(
         {},
         {},
         {
           skip: (parseInt(page as string) - 1) * parseInt(perPage as string),
           limit: parseInt(perPage as string),
         }
-      ).sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
-      
+      )
+        .populate('assignedEmployees')
+        .sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
+
       res.status(StatusCodes.OK).json({
         data: {
           items: response,
           totalRows,
         },
-        message: 'Warehouse items retrieved successfully',
+        message: 'Event items retrieved successfully',
       });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
@@ -32,55 +32,39 @@ export default class WarehouseController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { name, manufacturer, skuNumber, rentalValue, category, description, isSerialTracked, devices = [] } = req.body;
+      const { eventName, clientName, clientEmail, clientPhone, date, description, location, budget, assignedEmployees, estimatedHours, actualHours, notes } = req.body;
 
-      const existingSkuNumber = await Warehouse.findOne({ skuNumber });
-      if (existingSkuNumber) {
-        res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ message: 'SkuNumber o podanym numerze już istnieje', errors: { skuNumber: 'SkuNumber o podanym numerze już istnieje' } });
+      const existingEventName = await Event.findOne({ eventName });
+      if (existingEventName) {
+        res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ message: 'Wydarzenie o podanej nazwie już istnieje', errors: { eventName: 'Wydarzenie o podanej nazwie już istnieje' } });
         return;
       }
 
-      for (let i = 0; i < devices.length; i++) {
-        if (isSerialTracked) {
-          for (let j = i + 1; j < devices.length; j++) {
-            if (devices[i].serialNumber === devices[j].serialNumber) {
-              res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-                message: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
-                errors: {
-                  [`devices.${i}.serialNumber`]: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
-                },
-              });
-              return;
-            }
-          }
-
-          const existingItem = await Device.findOne({ serialNumber: devices[i].serialNumber });
-          if (existingItem) {
-            res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-              message: 'Urządzenie o podanym numerze seryjnym już istnieje',
-              errors: {
-                [`devices.${i}.serialNumber`]: 'Urządzenie o podanym numerze seryjnym już istnieje',
-              },
-            });
-            return;
-          }
-        }
-      }
-
       const userId = (req as any).userId;
-      const newWarehouse = new Warehouse({ name, manufacturer, skuNumber, rentalValue, category, description, isSerialTracked, createdBy: userId });
-      const _devices: Types.ObjectId[] = [];
 
-      for (let i = 0; i < devices.length; i++) {
-        const item = await Device.create({ ...devices[i], warehouseId: newWarehouse._id });
-        _devices.push(item._id);
-      }
+      const newEvent = new Event({
+        eventName,
+        clientName,
+        clientEmail,
+        clientPhone,
+        date,
+        description,
+        location,
+        budget,
+        assignedEmployees,
+        estimatedHours,
+        actualHours,
+        notes,
+        status: 'Pending',
+        createdBy: userId,
+      });
 
-      newWarehouse.devices = _devices;
-      newWarehouse.status = _devices.length > 0 ? 'Available' : 'Out of stock';
-      const response = await newWarehouse.save();
+      console.log(newEvent);
 
-      res.status(StatusCodes.CREATED).json({ message: 'Urządzenie dodane do magazynu', data: response });
+      const response = await newEvent.save().catch((err) => {
+        console.log(err);
+      });
+      res.status(StatusCodes.CREATED).json({ message: 'Wydarzenie zostało dodane', data: response });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
@@ -89,14 +73,14 @@ export default class WarehouseController {
   static async get(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const item = await Warehouse.findById(id).populate('createdBy', { password: 0 }).populate('devices');
 
+      const item = await Event.findById(id).populate('assignedEmployees');
       if (!item) {
-        res.status(StatusCodes.NOT_FOUND).json({ message: 'Warehouse item not found' });
+        res.status(StatusCodes.NOT_FOUND).json({ message: 'Event item not found' });
         return;
       }
 
-      res.status(StatusCodes.OK).json({ data: item, message: 'Warehouse item retrieved successfully' });
+      res.status(StatusCodes.OK).json({ data: item, message: 'Event item retrieved successfully' });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
@@ -105,102 +89,44 @@ export default class WarehouseController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, manufacturer, skuNumber, rentalValue, category, description, isSerialTracked, devices = [] } = req.body;
-      const existingSkuNumber = await Warehouse.findOne({ skuNumber });
+      const { eventName, clientName, clientEmail, clientPhone, date, description, location, budget, assignedEmployees, estimatedHours, actualHours, notes } = req.body;
 
-      const existingWarehouse = await Warehouse.findById(id);
-      if (!existingWarehouse) {
-        res.status(StatusCodes.NOT_FOUND).json({ message: 'Warehouse item not found' });
+      const existingEvent = await Event.findById(id);
+      if (!existingEvent) {
+        res.status(StatusCodes.NOT_FOUND).json({ message: 'Wydarzenie nie istnieje' });
         return;
       }
 
-      if (existingSkuNumber && existingSkuNumber._id.toString() !== id) {
-        res.status(400).json({ message: 'SkuNumber o podanym numerze już istnieje', errors: { skuNumber: 'SkuNumber o podanym numerze już istnieje' } });
+      const existingEventName = await Event.findOne({ eventName });
+      if (existingEventName && existingEventName._id.toString() !== id) {
+        res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ message: 'Wydarzenie o podanej nazwie już istnieje', errors: { eventName: 'Wydarzenie o podanej nazwie już istnieje' } });
         return;
       }
 
-      for (let i = 0; i < devices.length; i++) {
-        if (isSerialTracked) {
-          for (let j = i + 1; j < devices.length; j++) {
-            if (devices[i].serialNumber === devices[j].serialNumber) {
-              res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-                message: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
-                errors: {
-                  [`devices.${i}.serialNumber`]: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
-                },
-              });
-              return;
-            }
-          }
-
-          const existingDevice = await Device.findOne({ serialNumber: devices[i].serialNumber });
-          if (existingDevice && existingDevice._id.toString() !== devices[i]._id) {
-            res.status(400).json({
-              message: 'Urządzenie o podanym numerze seryjnym już istnieje',
-              errors: {
-                [`devices.${i}.serialNumber`]: 'Urządzenie o podanym numerze seryjnym już istnieje',
-              },
-            });
-            return;
-          }
-        }
-      }
-
-      const _devices: Types.ObjectId[] = [];
-      const exisitingDevices = existingWarehouse.devices;
-
-      for (let i = 0; i < exisitingDevices.length; i++) {
-        const device = devices.find((item: any) => item._id === exisitingDevices[i].toString());
-
-        if (device) {
-          await Device.findByIdAndUpdate(exisitingDevices[i], { ...device, warehouseId: existingWarehouse._id }, { new: true });
-        } else {
-          await Device.findByIdAndDelete(exisitingDevices[i]);
-        }
-      }
-
-      for (let i = 0; i < devices.length; i++) {
-        if (!devices[i]._id) {
-          const newItem = await Device.create({ ...devices[i], warehouseId: existingWarehouse._id });
-          _devices.push(newItem._id);
-        } else {
-          _devices.push(devices[i]._id);
-        }
-      }
-
-      const updatedItem = await Warehouse.findByIdAndUpdate(
+      const updatedItem = await Event.findByIdAndUpdate(
         id,
         {
-          name,
-          manufacturer,
-          skuNumber,
-          rentalValue,
-          category,
+          eventName,
+          clientName,
+          clientEmail,
+          clientPhone,
+          date,
           description,
-          isSerialTracked,
-          devices: _devices,
-          status: _devices.length > 0 ? 'Available' : 'Out of stock',
+          location,
+          budget,
+          assignedEmployees,
+          estimatedHours,
+          actualHours,
+          notes,
         },
         { new: true }
-      );
+      ).catch((err) => {
+        console.log(err);
+      });
 
-      res.status(StatusCodes.OK).json({ message: 'Warehouse item updated successfully', data: updatedItem });
+      res.status(StatusCodes.OK).json({ message: 'Wydarzenie zostało zaktualizowane', data: updatedItem });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
-  }
-
-  static async delete(req: Request, res: Response): Promise<void> {
-    // try {
-    //   const { id } = req.params;
-    //   const deletedItem = await WarehouseItem.findByIdAndDelete(id);
-    //   if (!deletedItem) {
-    //     res.status(StatusCodes.NOT_FOUND).json({ message: 'Warehouse item not found' });
-    //     return;
-    //   }
-    //   res.status(StatusCodes.OK).json({ message: 'Warehouse item deleted successfully' });
-    // } catch (err) {
-    //   res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
-    // }
   }
 }

@@ -7,9 +7,9 @@ import Permissions from '../permissions';
 
 const router = Router();
 
-router.get('/list', authentication, authorization(Permissions.WAREHOUSE.ACCESS), EventController.list);
-// router.post('/create', authentication, authorization(Permissions.WAREHOUSE.ACCESS), validate(zodSchema), WarehouseController.create);
-// router.put('/update/:id', authentication, authorization(Permissions.WAREHOUSE.ACCESS), validate(zodSchema), WarehouseController.update);
-// router.get('/:id', authentication, authorization(Permissions.WAREHOUSE.ACCESS), WarehouseController.get);
+router.get('/list', authentication, authorization(Permissions.EVENTS.ACCESS), EventController.list);
+router.post('/create', authentication, authorization(Permissions.EVENTS.ACCESS), validate(zodSchema), EventController.create);
+router.put('/update/:id', authentication, authorization(Permissions.EVENTS.ACCESS), validate(zodSchema), EventController.update);
+router.get('/:id', authentication, authorization(Permissions.EVENTS.ACCESS), EventController.get);
 
 export default router;

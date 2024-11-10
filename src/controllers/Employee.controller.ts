@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import Employee from '../models/Employee.model';
 
-export default class EmployeesController {
+export default class EmployeeController {
   static async list(req: Request, res: Response): Promise<void> {
     try {
       const { page = 1, perPage = 9999, sort = '_id', order = 'ASC' } = req.query;

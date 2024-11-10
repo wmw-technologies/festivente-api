@@ -15,7 +15,7 @@ function validate(schema: z.ZodObject<any, any>) {
           errors[issue.path.join('.')] = issue.message;
         });
 
-        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Invalid data', errors });
+        res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ message: 'Invalid data', errors });
       } else {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error' });
       }
