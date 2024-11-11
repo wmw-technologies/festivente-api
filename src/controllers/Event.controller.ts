@@ -41,7 +41,6 @@ export default class EventController {
       }
 
       const userId = (req as any).userId;
-
       const newEvent = new Event({
         eventName,
         clientName,
@@ -59,11 +58,7 @@ export default class EventController {
         createdBy: userId,
       });
 
-      console.log(newEvent);
-
-      const response = await newEvent.save().catch((err) => {
-        console.log(err);
-      });
+      const response = await newEvent.save();
       res.status(StatusCodes.CREATED).json({ message: 'Wydarzenie zostało dodane', data: response });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
@@ -120,9 +115,7 @@ export default class EventController {
           notes,
         },
         { new: true }
-      ).catch((err) => {
-        console.log(err);
-      });
+      );
 
       res.status(StatusCodes.OK).json({ message: 'Wydarzenie zostało zaktualizowane', data: updatedItem });
     } catch (err) {
