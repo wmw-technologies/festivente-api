@@ -11,6 +11,7 @@ import RentalRoutes from './routes/Rental.routes';
 import EmployeeRoutes from './routes/Employee.routes';
 import EventRoutes from './routes/Event.routes';
 import TransportRoutes from './routes/Transport.routes';
+import ServiceRoutes from './routes/Service.routes';
 
 connectDB().then(() => {
   // Seed data
@@ -37,6 +38,7 @@ router.use('/rental', RentalRoutes);
 router.use('/employee', EmployeeRoutes);
 router.use('/event', EventRoutes);
 router.use('/transport', TransportRoutes);
+router.use('/service', ServiceRoutes);
 
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
