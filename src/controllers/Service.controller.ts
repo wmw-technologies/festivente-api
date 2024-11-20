@@ -36,7 +36,7 @@ class ServiceController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { returnDate, serviceDate, servicePerson, devices } = req.body;
+      const { returnDate, serviceDate, description, repairPrice , servicePerson, devices  } = req.body;
 
       const existingDevices = await Device.find({ _id: { $in: devices } });
       if (existingDevices.length !== devices.length) {
@@ -50,9 +50,9 @@ class ServiceController {
         return;
       }
 
-      console.log('servicePerson', returnDate, serviceDate, servicePerson, devices);
+      console.log('servicePerson', returnDate, serviceDate, servicePerson, devices , description, repairPrice);
 
-      const service = new Service({ returnDate, serviceDate, servicePerson, devices });
+      const service = new Service({ returnDate, serviceDate, servicePerson, devices , description, repairPrice });
       const response = await service.save();
 
       res.status(StatusCodes.CREATED).json({ data: response, message: 'Serwis utworzony pomyślnie' });
@@ -80,7 +80,7 @@ class ServiceController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { status, returnDate, serviceDate, servicePerson, devices } = req.body;
+      const { status, returnDate, serviceDate, servicePerson, devices , description, repairPrice } = req.body;
 
       const service = await Service.findById(id);
       if (!service) {
@@ -105,6 +105,9 @@ class ServiceController {
       service.serviceDate = serviceDate;
       service.servicePerson = servicePerson;
       service.devices = devices;
+      service.description = description;
+      service.repairPrice = repairPrice;
+
 
       const response = await service.save();
 

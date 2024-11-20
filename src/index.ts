@@ -12,6 +12,7 @@ import EmployeeRoutes from './routes/Employee.routes';
 import EventRoutes from './routes/Event.routes';
 import TransportRoutes from './routes/Transport.routes';
 import ServiceRoutes from './routes/Service.routes';
+import CarsRouter from './routes/Cars.routs';
 
 connectDB().then(() => {
   // Seed data
@@ -39,6 +40,7 @@ router.use('/employee', EmployeeRoutes);
 router.use('/event', EventRoutes);
 router.use('/transport', TransportRoutes);
 router.use('/service', ServiceRoutes);
+router.use('/cars', CarsRouter);
 
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
