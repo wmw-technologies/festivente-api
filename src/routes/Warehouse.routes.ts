@@ -11,6 +11,5 @@ router.get('/list', authentication, authorization(Permissions.WAREHOUSE.ACCESS),
 router.post('/create', authentication, authorization(Permissions.WAREHOUSE.ACCESS), validate(zodSchema), WarehouseController.create);
 router.put('/update/:id', authentication, authorization(Permissions.WAREHOUSE.ACCESS), validate(zodSchema), WarehouseController.update);
 router.get('/:id', authentication, authorization(Permissions.WAREHOUSE.ACCESS), WarehouseController.get);
-//router.delete('/delete/:id', authentication, authorization(Permissions.ADMINISTRATION.ACCESS), WarehouseItemController.delete);
 
 export default router;

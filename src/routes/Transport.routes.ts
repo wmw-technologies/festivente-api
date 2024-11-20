@@ -8,8 +8,8 @@ import Permissions from '../permissions';
 const router = Router();
 
 router.get('/list', authentication, authorization(Permissions.TRANSPORT.ACCESS), TransportController.list);
-router.post('/create', authentication, authorization(Permissions.EVENTS.ACCESS), validate(zodSchema), TransportController.create);
-router.put('/update/:id', authentication, authorization(Permissions.EVENTS.ACCESS), validate(zodSchema), TransportController.update);
-router.get('/:id', authentication, authorization(Permissions.EVENTS.ACCESS), TransportController.get);
+router.post('/create', authentication, authorization(Permissions.TRANSPORT.ACCESS), validate(zodSchema), TransportController.create);
+router.put('/update/:id', authentication, authorization(Permissions.TRANSPORT.ACCESS), validate(zodSchema), TransportController.update);
+router.get('/:id', authentication, authorization(Permissions.TRANSPORT.ACCESS), TransportController.get);
 
 export default router;
