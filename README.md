@@ -31,9 +31,3 @@ Aby zainstalować projekt, wykonaj poniższe kroki:
    npm run dev
    ```
 
-### Autorzy
-
-- [Wojciech Skirło](https://github.com/WojciechSkirlo)
-- [Michał Sałek](https://github.com/salekmichal1)
-- [Wiktor Rogóż](https://github.com/raczko)
-
