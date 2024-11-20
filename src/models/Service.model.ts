@@ -12,9 +12,18 @@ const serviceSchema = new mongoose.Schema(
       required: true,
       default: Date.now,
     },
+    description: {
+      type: String,
+      required: false,
+    },
+    repairPrice: {
+      type: Number,
+      required: false,
+    },
     servicePerson: [
       {
         type: mongoose.Schema.Types.ObjectId,
+        required: false,
         ref: 'Employee',
       },
     ],
@@ -41,6 +50,8 @@ export default mongoose.model('Service', serviceSchema);
 export const zodSchema = z.object({
   returnDate: z.any().optional().nullable(),
   serviceDate: z.string().datetime(),
-  servicePerson: z.array(z.string()).min(1),
+  servicePerson: z.array(z.string()).optional(),
   devices: z.array(z.string()).min(1),
+  repairPrice: z.number().min(0).optional(),
+  description: z.string().max(256).optional(),
 });
