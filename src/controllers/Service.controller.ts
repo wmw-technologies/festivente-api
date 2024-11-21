@@ -18,7 +18,7 @@ class ServiceController {
           limit: parseInt(perPage as string),
         }
       )
-        .populate('devices')
+        .populate('device')
         .populate('servicePerson')
         .sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
 
@@ -36,24 +36,26 @@ class ServiceController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { returnDate, serviceDate, description, repairPrice , servicePerson, devices  } = req.body;
+      const { returnDate, serviceDate, repairPrice, servicePerson, device, description } = req.body;
 
-      const existingDevices = await Device.find({ _id: { $in: devices } });
-      if (existingDevices.length !== devices.length) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Niektóre urządzenia nie istnieją' });
+      console.log({ returnDate, serviceDate, repairPrice, servicePerson, device, description });
+
+      const existingDevice = await Device.find({ _id: device });
+      if (!existingDevice) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Urządzenie nie istnieje' });
         return;
       }
 
-      const existingEmployees = await Employee.find({ _id: { $in: servicePerson } });
-      if (existingEmployees.length !== servicePerson.length) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Niektórzy pracownicy nie istnieją' });
+      const existingEmployees = await Employee.find({ _id: servicePerson });
+      if (!existingEmployees) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Pracownik nie istnieje' });
         return;
       }
 
-      console.log('servicePerson', returnDate, serviceDate, servicePerson, devices , description, repairPrice);
-
-      const service = new Service({ returnDate, serviceDate, servicePerson, devices , description, repairPrice });
-      const response = await service.save();
+      const service = new Service({ returnDate, serviceDate, repairPrice, servicePerson, device, description });
+      const response = await service.save().catch((err) => {
+        console.log("erro", err)
+      });
 
       res.status(StatusCodes.CREATED).json({ data: response, message: 'Serwis utworzony pomyślnie' });
     } catch (err) {
@@ -64,7 +66,7 @@ class ServiceController {
   static async get(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const service = await Service.findById(id).populate('devices').populate('servicePerson');
+      const service = await Service.findById(id).populate('device').populate('servicePerson');
 
       if (!service) {
         res.status(StatusCodes.NOT_FOUND).json({ message: 'Serwis nie został znaleziony' });
@@ -80,7 +82,7 @@ class ServiceController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { status, returnDate, serviceDate, servicePerson, devices , description, repairPrice } = req.body;
+      const { returnDate, serviceDate, repairPrice, servicePerson, device, description } = req.body;
 
       const service = await Service.findById(id);
       if (!service) {
@@ -88,26 +90,24 @@ class ServiceController {
         return;
       }
 
-      const existingDevices = await Device.find({ _id: { $in: devices } });
-      if (existingDevices.length !== devices.length) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Niektóre urządzenia nie istnieją' });
+      const existingDevices = await Device.find({ _id: device });
+      if (!existingDevices) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Urządzenie nie istnieje' });
         return;
       }
 
-      const existingEmployees = await Employee.find({ _id: { $in: servicePerson } });
-      if (existingEmployees.length !== servicePerson.length) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Niektórzy pracownicy nie istnieją' });
+      const existingEmployees = await Employee.find({ _id: servicePerson });
+      if (!existingEmployees) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Pracownik nie istnieje' });
         return;
       }
 
-      service.status = status;
       service.returnDate = returnDate;
       service.serviceDate = serviceDate;
       service.servicePerson = servicePerson;
-      service.devices = devices;
+      service.device = device;
       service.description = description;
       service.repairPrice = repairPrice;
-
 
       const response = await service.save();
 
