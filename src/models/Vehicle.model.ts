@@ -8,21 +8,21 @@ const vehicleSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    deviceType: {
-      type: String,
-      required: true,
-    },
+    // deviceType: {
+    //   type: String,
+    //   required: true,
+    // },
     pricePerKm: {
       type: Number,
       required: true,
     },
     inspectionDate: {
       type: Date,
-      required: true,
+      required: false,
     },
     insuranceDate: {
       type: Date,
-      required: true,
+      required: false,
     },
     description: {
       type: String,
@@ -38,9 +38,9 @@ export default mongoose.model('Vehicle', vehicleSchema);
 
 export const zodSchema = z.object({
   registrationNumber: z.string().min(5).max(15),
-  deviceType: z.string().min(1).max(15),
+  // deviceType: z.string().min(1).max(15),
   pricePerKm: z.number().min(0),
-  insuranceDate: z.string().datetime(),
-  inspectionDate: z.string().datetime(),
+  insuranceDate: z.string().datetime().optional(),
+  inspectionDate: z.string().datetime().optional(),
   description: z.string().max(256).optional(),
 });
