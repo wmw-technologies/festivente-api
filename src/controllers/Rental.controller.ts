@@ -74,7 +74,6 @@ export default class RentalController {
         inTotal,
         notes,
         devices,
-        status: 'Test',
         createdBy: userId,
       });
       const response = await newRental.save();
@@ -171,7 +170,7 @@ export default class RentalController {
 
   static async availableDevices(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.query;
+      const { id, rentalDate, returnDate } = req.query;
       
       const devices = await Device.find({
         $or: [
