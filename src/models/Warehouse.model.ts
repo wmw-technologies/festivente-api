@@ -28,10 +28,6 @@ const schema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    isSerialTracked: {
-      type: Boolean,
-      required: true,
-    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
