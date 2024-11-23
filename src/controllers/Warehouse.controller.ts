@@ -32,7 +32,7 @@ export default class WarehouseController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { name, manufacturer, skuNumber, rentalValue, category, description, isSerialTracked, devices = [] } = req.body;
+      const { name, manufacturer, skuNumber, rentalValue, category, description, devices = [] } = req.body;
 
       const existingSkuNumber = await Warehouse.findOne({ skuNumber });
       if (existingSkuNumber) {
@@ -41,34 +41,32 @@ export default class WarehouseController {
       }
 
       for (let i = 0; i < devices.length; i++) {
-        if (isSerialTracked) {
-          for (let j = i + 1; j < devices.length; j++) {
-            if (devices[i].serialNumber === devices[j].serialNumber) {
-              res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-                message: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
-                errors: {
-                  [`devices.${i}.serialNumber`]: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
-                },
-              });
-              return;
-            }
-          }
-
-          const existingItem = await Device.findOne({ serialNumber: devices[i].serialNumber });
-          if (existingItem) {
+        for (let j = i + 1; j < devices.length; j++) {
+          if (devices[i].serialNumber === devices[j].serialNumber) {
             res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-              message: 'Urządzenie o podanym numerze seryjnym już istnieje',
+              message: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
               errors: {
-                [`devices.${i}.serialNumber`]: 'Urządzenie o podanym numerze seryjnym już istnieje',
+                [`devices.${i}.serialNumber`]: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
               },
             });
             return;
           }
         }
+
+        const existingItem = await Device.findOne({ serialNumber: devices[i].serialNumber });
+        if (existingItem) {
+          res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
+            message: 'Urządzenie o podanym numerze seryjnym już istnieje',
+            errors: {
+              [`devices.${i}.serialNumber`]: 'Urządzenie o podanym numerze seryjnym już istnieje',
+            },
+          });
+          return;
+        }
       }
 
       const userId = (req as any).userId;
-      const newWarehouse = new Warehouse({ name, manufacturer, skuNumber, rentalValue, category, description, isSerialTracked, createdBy: userId });
+      const newWarehouse = new Warehouse({ name, manufacturer, skuNumber, rentalValue, category, description, createdBy: userId });
       const _devices: Types.ObjectId[] = [];
 
       for (let i = 0; i < devices.length; i++) {
@@ -77,7 +75,6 @@ export default class WarehouseController {
       }
 
       newWarehouse.devices = _devices;
-      newWarehouse.status = _devices.length > 0 ? 'Available' : 'Out of stock';
       const response = await newWarehouse.save();
 
       res.status(StatusCodes.CREATED).json({ message: 'Urządzenie dodane do magazynu', data: response });
@@ -105,7 +102,7 @@ export default class WarehouseController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { name, manufacturer, skuNumber, rentalValue, category, description, isSerialTracked, devices = [] } = req.body;
+      const { name, manufacturer, skuNumber, rentalValue, category, description, devices = [] } = req.body;
       const existingSkuNumber = await Warehouse.findOne({ skuNumber });
 
       const existingWarehouse = await Warehouse.findById(id);
@@ -120,29 +117,27 @@ export default class WarehouseController {
       }
 
       for (let i = 0; i < devices.length; i++) {
-        if (isSerialTracked) {
-          for (let j = i + 1; j < devices.length; j++) {
-            if (devices[i].serialNumber === devices[j].serialNumber) {
-              res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
-                message: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
-                errors: {
-                  [`devices.${i}.serialNumber`]: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
-                },
-              });
-              return;
-            }
-          }
-
-          const existingDevice = await Device.findOne({ serialNumber: devices[i].serialNumber });
-          if (existingDevice && existingDevice._id.toString() !== devices[i]._id) {
-            res.status(400).json({
-              message: 'Urządzenie o podanym numerze seryjnym już istnieje',
+        for (let j = i + 1; j < devices.length; j++) {
+          if (devices[i].serialNumber === devices[j].serialNumber) {
+            res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({
+              message: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
               errors: {
-                [`devices.${i}.serialNumber`]: 'Urządzenie o podanym numerze seryjnym już istnieje',
+                [`devices.${i}.serialNumber`]: 'Urządzenia nie mogą mieć takiego samego numeru seryjnego',
               },
             });
             return;
           }
+        }
+
+        const existingDevice = await Device.findOne({ serialNumber: devices[i].serialNumber });
+        if (existingDevice && existingDevice._id.toString() !== devices[i]._id) {
+          res.status(400).json({
+            message: 'Urządzenie o podanym numerze seryjnym już istnieje',
+            errors: {
+              [`devices.${i}.serialNumber`]: 'Urządzenie o podanym numerze seryjnym już istnieje',
+            },
+          });
+          return;
         }
       }
 
@@ -177,9 +172,7 @@ export default class WarehouseController {
           rentalValue,
           category,
           description,
-          isSerialTracked,
           devices: _devices,
-          status: _devices.length > 0 ? 'Available' : 'Out of stock',
         },
         { new: true }
       );
@@ -188,19 +181,5 @@ export default class WarehouseController {
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
-  }
-
-  static async delete(req: Request, res: Response): Promise<void> {
-    // try {
-    //   const { id } = req.params;
-    //   const deletedItem = await WarehouseItem.findByIdAndDelete(id);
-    //   if (!deletedItem) {
-    //     res.status(StatusCodes.NOT_FOUND).json({ message: 'Warehouse item not found' });
-    //     return;
-    //   }
-    //   res.status(StatusCodes.OK).json({ message: 'Warehouse item deleted successfully' });
-    // } catch (err) {
-    //   res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
-    // }
   }
 }

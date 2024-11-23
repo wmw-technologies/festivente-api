@@ -32,11 +32,6 @@ const schema = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
-    status: {
-      type: String,
-      enum: ['Available', 'Out of stock'],
-      default: 'Out of stock',
-    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
