@@ -74,7 +74,7 @@ export const zodSchema = z.object({
   clientName: z.string().min(3).max(64),
   clientEmail: z.string().email(),
   clientPhone: z.string().min(9).max(16),
-  date: z.string().date(),
+  date: z.string().datetime(),
   description: z.string().max(256).optional(),
   location: z.string().min(3).max(64),
   budget: z

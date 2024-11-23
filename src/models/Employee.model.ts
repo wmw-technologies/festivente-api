@@ -28,6 +28,20 @@ const schema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    overtime: {
+      first: {
+        type: Number,
+        required: true,
+      },
+      second: {
+        type: Number,
+        required: true,
+      },
+      third: {
+        type: Number,
+        required: true,
+      }
+    }
   },
   {
     timestamps: true,
@@ -43,4 +57,9 @@ export const zodSchema = z.object({
   phone: z.string().min(9).max(16).optional().or(z.literal('')),
   position: z.string(),
   dailyRate: z.string().transform((val) => parseFloat(val)),
+  overtime: z.object({
+    first: z.number().min(0).max(10),
+    second: z.number().min(0).max(10),
+    third: z.number().min(0).max(10)
+  })
 });

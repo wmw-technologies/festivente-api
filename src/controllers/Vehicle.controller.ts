@@ -44,7 +44,7 @@ export default class VehicleController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { registrationNumber, pricePerKm, inspectionDate, insuranceDate, description } = req.body;
+      const { brand, model, registrationNumber, pricePerKm, inspectionDate, insuranceDate, description } = req.body;
 
       const existingVehicle = await Vehicle.findOne({ registrationNumber });
       if (existingVehicle) {
@@ -52,7 +52,7 @@ export default class VehicleController {
         return;
       }
 
-      const vehicle = new Vehicle({ registrationNumber, pricePerKm, inspectionDate, insuranceDate, description });
+      const vehicle = new Vehicle({ brand, model, registrationNumber, pricePerKm, inspectionDate, insuranceDate, description });
 
       const response = await vehicle.save();
 
@@ -67,7 +67,7 @@ export default class VehicleController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { registrationNumber, pricePerKm, inspectionDate, insuranceDate, description } = req.body;
+      const { brand, model, registrationNumber, pricePerKm, inspectionDate, insuranceDate, description } = req.body;
 
       const vehicle = await Vehicle.findById(id);
       if (!vehicle) {
@@ -84,6 +84,8 @@ export default class VehicleController {
         vehicle.registrationNumber = registrationNumber;
       }
 
+      vehicle.brand = brand;
+      vehicle.model = model;
       vehicle.pricePerKm = pricePerKm;
       vehicle.inspectionDate = inspectionDate;
       vehicle.insuranceDate = insuranceDate;

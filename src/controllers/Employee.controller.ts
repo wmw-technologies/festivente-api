@@ -30,7 +30,7 @@ export default class EmployeeController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { firstName, lastName, email, phone, position, dailyRate } = req.body;
+      const { firstName, lastName, email, phone, position, dailyRate, overtime } = req.body;
 
       const existingEmail = await Employee.findOne({ email });
       if (existingEmail) {
@@ -38,7 +38,7 @@ export default class EmployeeController {
         return;
       }
 
-      const newEmployee = new Employee({ firstName, lastName, email, phone, position, dailyRate });
+      const newEmployee = new Employee({ firstName, lastName, email, phone, position, dailyRate, overtime });
       const response = await newEmployee.save();
 
       res.status(StatusCodes.CREATED).json({ message: 'Pracownik został dodany', data: response });
@@ -66,7 +66,7 @@ export default class EmployeeController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { firstName, lastName, email, phone, position, dailyRate } = req.body;
+      const { firstName, lastName, email, phone, position, dailyRate, overtime } = req.body;
 
       const employee = await Employee.findById(id);
 
@@ -82,7 +82,7 @@ export default class EmployeeController {
         return;
       }
 
-      const updatedItem = await Employee.findByIdAndUpdate(id, { firstName, lastName, email, phone, position, dailyRate }, { new: true });
+      const updatedItem = await Employee.findByIdAndUpdate(id, { firstName, lastName, email, phone, position, dailyRate, overtime }, { new: true });
 
       res.status(StatusCodes.OK).json({ message: 'Employee updated successfully', data: updatedItem });
     } catch (err) {
