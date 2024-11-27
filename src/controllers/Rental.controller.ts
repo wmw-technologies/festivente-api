@@ -95,7 +95,7 @@ export default class RentalController {
           path: 'warehouseId',
           model: 'Warehouse'
         }
-      });;
+      });
 
       if (!rental) {
         res.status(StatusCodes.NOT_FOUND).json({ message: 'Wypożyczenie nie zostało znalezione' });

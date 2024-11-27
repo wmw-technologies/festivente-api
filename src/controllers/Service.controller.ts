@@ -66,7 +66,14 @@ class ServiceController {
   static async get(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const service = await Service.findById(id).populate('device').populate('servicePerson');
+      const service = await Service.findById(id).populate('servicePerson')
+      .populate({
+        path: 'device',
+        populate: {
+          path: 'warehouseId',
+          model: 'Warehouse'
+        },
+      });
 
       if (!service) {
         res.status(StatusCodes.NOT_FOUND).json({ message: 'Serwis nie został znaleziony' });
