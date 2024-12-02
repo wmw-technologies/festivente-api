@@ -3,24 +3,12 @@ import * as z from 'zod';
 
 const transportSchema = new mongoose.Schema(
   {
-    vehicleType: {
-      type: String,
-      required: true,
-    },
-    vehicleDetails: {
-      brand: {
-        type: String,
-        required: true,
-      },
-      model: {
-        type: String,
-        required: true,
-      },
-      registrationNumber: {
-        type: String,
-        required: true,
-      },
-    },
+    vehicleDetails: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Vehicle',
+        },
+      ],   
     driver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Employee',

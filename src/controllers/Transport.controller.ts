@@ -70,7 +70,7 @@ export default class TransportController {
   static async get(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const item = await Transport.findById(id).populate('driver').populate('event');
+      const item = await Transport.findById(id).populate('driver').populate('event').populate('vehicleDetails');
 
       if (!item) {
         res.status(StatusCodes.NOT_FOUND).json({ message: 'Transport item not found' });
