@@ -41,10 +41,6 @@ const eventSchema = new mongoose.Schema(
         ref: 'Employee',
       },
     ],
-    status: {
-      type: String,
-      required: false,
-    },
     estimatedHours: {
       type: Number,
       required: false,

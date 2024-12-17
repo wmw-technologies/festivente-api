@@ -19,16 +19,6 @@ const deviceSchema = new mongoose.Schema(
       ref: 'Warehouse',
       required: true,
     },
-    rentalId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Rental',
-      required: false, 
-    },
-    serviceId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Service',
-      required: false,
-    }
   },
   {
     timestamps: true,

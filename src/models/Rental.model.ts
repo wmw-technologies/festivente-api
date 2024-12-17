@@ -91,5 +91,6 @@ export const zodSchema = z.object({
     .number()
     .refine((val) => val >= 0, { message: 'Amount must be positive' })
     .refine((val) => val <= 100000, { message: 'Amount must be less than or equal to 100,000 PLN' }),
+  methodOfPayment: z.string().optional().nullable(),
   notes: z.string().optional()
 });

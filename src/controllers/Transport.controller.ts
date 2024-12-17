@@ -15,9 +15,13 @@ export default class TransportController {
           limit: parseInt(perPage as string),
         }
       )
-        .populate('driver')
         .populate('event')
         .sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
+
+      response.forEach((item) => {
+        const status = item.departureTime > new Date() ? 'Scheduled' : item.arrivalTime! > new Date() ? 'In Progress' : 'Completed';
+        item.set('status', status, { strict: false });
+      });
 
       res.status(StatusCodes.OK).json({
         data: {
@@ -33,7 +37,7 @@ export default class TransportController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { vehicleType, vehicleDetails, driver, event, departureTime, arrivalTime, departureLocation, destinationLocation, notes } = req.body;
+      const { vehicles, event, departureTime, arrivalTime, departureLocation, destinationLocation, notes, phoneNumber } = req.body;
 
       if (arrivalTime && new Date(departureTime) > new Date(arrivalTime)) {
         res.status(StatusCodes.BAD_REQUEST).json({
@@ -47,16 +51,14 @@ export default class TransportController {
 
       const userId = (req as any).userId;
       const newTransport = new Transport({
-        vehicleType,
-        vehicleDetails,
-        driver,
+        vehicles,
         event,
         departureTime,
         arrivalTime,
         departureLocation,
         destinationLocation,
         notes,
-        status: 'active',
+        phoneNumber,
         createdBy: userId,
       });
 
@@ -70,12 +72,17 @@ export default class TransportController {
   static async get(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const item = await Transport.findById(id).populate('driver').populate('event').populate('vehicleDetails');
+      const item = await Transport.findById(id).populate('event').populate('vehicles');
 
       if (!item) {
         res.status(StatusCodes.NOT_FOUND).json({ message: 'Transport item not found' });
         return;
       }
+      
+      const status = item.departureTime > new Date() ? 'Scheduled' : item.arrivalTime! > new Date() ? 'In Progress' : 'Completed'; 
+
+      item.set('status', status, { strict: false });
+
       res.status(StatusCodes.OK).json({ data: item, message: 'Transport item retrieved successfully' });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
@@ -85,7 +92,7 @@ export default class TransportController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { vehicleType, vehicleDetails, driver, event, departureTime, arrivalTime, departureLocation, destinationLocation, notes } = req.body;
+      const { vehicles, event, departureTime, arrivalTime, departureLocation, destinationLocation, notes, phoneNumber } = req.body;
 
       const existingTransport = await Transport.findById(id);
       if (!existingTransport) {
@@ -106,14 +113,13 @@ export default class TransportController {
       const updatedItem = await Transport.findByIdAndUpdate(
         id,
         {
-          vehicleType,
-          vehicleDetails,
-          driver,
+          vehicles,
           event,
           departureTime,
           arrivalTime,
           departureLocation,
           destinationLocation,
+          phoneNumber,
           notes,
         },
         { new: true }

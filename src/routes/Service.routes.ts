@@ -10,6 +10,7 @@ const router = Router();
 router.get('/list', authentication, authorization(Permissions.SERVICE.ACCESS), ServiceController.list);
 router.post('/create', authentication, authorization(Permissions.SERVICE.ACCESS), validate(zodSchema), ServiceController.create);
 router.put('/update/:id', authentication, authorization(Permissions.SERVICE.ACCESS), validate(zodSchema), ServiceController.update);
+// router.get('/available-devices', authentication, authorization(Permissions.SERVICE.ACCESS), ServiceController.availableDevices);
 router.get('/:id', authentication, authorization(Permissions.SERVICE.ACCESS), ServiceController.get);
 
 export default router;

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import Rental from '../models/Rental.model';
 import Device from '../models/Device.model';
+import Service from '../models/Service.model';
 
 export default class RentalController {
   static async list(req: Request, res: Response): Promise<void> {
@@ -34,7 +35,7 @@ export default class RentalController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { clientName, clientCity, clientStreet, clientPostCode, clientPhone, clientEmail, rentalDate, returnDate, devices, inTotal, notes } = req.body;
+      const { clientName, clientCity, clientStreet, clientPostCode, clientPhone, clientEmail, rentalDate, returnDate, devices, inTotal, notes, paymentForm, isPaid } = req.body;
 
       if (new Date(rentalDate) > new Date(returnDate)) {
         res
@@ -52,14 +53,14 @@ export default class RentalController {
         return;
       }
 
-      const unavailableDevices = await Device.find({ _id: { $in: devices }, rentalId: { $ne: null } });
-      if (unavailableDevices.length > 0) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-          message: 'Niektóre urządzenia są już wypożyczone',
-          errors: { devices: 'Niektóre urządzenia są już wypożyczone' },
-        });
-        return;
-      }
+      // const unavailableDevices = await Device.find({ _id: { $in: devices }, rentalId: { $ne: null } });
+      // if (unavailableDevices.length > 0) {
+      //   res.status(StatusCodes.BAD_REQUEST).json({
+      //     message: 'Niektóre urządzenia są już wypożyczone',
+      //     errors: { devices: 'Niektóre urządzenia są już wypożyczone' },
+      //   });
+      //   return;
+      // }
 
       const userId = (req as any).userId;
       const newRental = new Rental({
@@ -74,11 +75,11 @@ export default class RentalController {
         inTotal,
         notes,
         devices,
+        paymentForm,
+        isPaid,
         createdBy: userId,
       });
       const response = await newRental.save();
-
-      await Device.updateMany({ _id: { $in: devices } }, { $set: { rentalId: response._id } });
 
       res.status(StatusCodes.CREATED).json({ data: response, message: 'Wypożyczenie utworzone pomyślnie' });
     } catch (err) {
@@ -111,7 +112,8 @@ export default class RentalController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { clientName, clientCity, clientStreet, clientPostCode, clientPhone, clientEmail, rentalDate, returnDate, devices, inTotal, notes } = req.body;
+      const { clientName, clientCity, clientStreet, clientPostCode, clientPhone, clientEmail, rentalDate, returnDate, devices, inTotal, notes, paymentForm, isPaid } = req.body;
+      // const { clientName, clientCity, clientStreet, clientPostCode, clientPhone, clientEmail, rentalDate, returnDate, devices, inTotal, notes } = req.body;
 
       if (new Date(rentalDate) > new Date(returnDate)) {
         res.status(StatusCodes.BAD_REQUEST).json({
@@ -144,10 +146,10 @@ export default class RentalController {
         return;
       }
 
-      const oldDevices = rental.devices || [];
+      // const oldDevices = rental.devices || [];
 
-      await Device.updateMany({ _id: { $in: oldDevices } }, { $set: { rentalId: null } });
-      await Device.updateMany({ _id: { $in: devices } }, { $set: { rentalId: rental._id } });
+      // await Device.updateMany({ _id: { $in: oldDevices } }, { $set: { rentalId: null } });
+      // await Device.updateMany({ _id: { $in: devices } }, { $set: { rentalId: rental._id } });
 
       rental.clientName = clientName;
       rental.clientCity = clientCity;
@@ -159,6 +161,9 @@ export default class RentalController {
       rental.returnDate = returnDate;
       rental.inTotal = inTotal;
       rental.notes = notes;
+      rental.devices = devices;
+      rental.paymentForm = paymentForm;
+      rental.isPaid = isPaid;
 
       const response = await rental.save();
 
@@ -171,15 +176,48 @@ export default class RentalController {
   static async availableDevices(req: Request, res: Response): Promise<void> {
     try {
       const { id, rentalDate, returnDate } = req.query;
-      
-      const devices = await Device.find({
-        $or: [
-          { rentalId: null },
-          { rentalId: id }
-        ]
-      }).populate('warehouseId');
 
-      res.status(StatusCodes.OK).json({ data: devices, message: 'Lista dostępnych urządzeń pobrana pomyślnie' });
+      const rentals = await Rental.find({
+        $or: [
+          {
+            rentalDate: {
+              $gte: rentalDate,
+              $lt: returnDate,
+            },
+          },
+          {
+            returnDate: {
+              $gt: rentalDate,
+              $lte: returnDate,
+            },
+          },
+        ],
+      });
+
+      const services = await Service.find({
+        $or: [
+          {
+            rentalDate: {
+              $gte: rentalDate,
+              $lt: returnDate,
+            },
+          },
+          {
+            returnDate: {
+              $gt: rentalDate,
+              $lte: returnDate,
+            },
+          },
+        ],
+      })
+
+      const unavailableDevicesRentals = rentals.map((rental) => rental.devices).flat().map((device) => device._id).filter((device) => device._id !== id as any);
+      const unavailableDevicesServices = services.map((service) => service.device).flat().map((device) => device._id);
+      const unavailableDevices = [...unavailableDevicesServices, ...unavailableDevicesRentals];
+
+      const availableDevices = await Device.find({ _id: { $nin: unavailableDevices } }).populate('warehouseId');
+
+      res.status(StatusCodes.OK).json({ data: availableDevices, message: 'Lista dostępnych urządzeń pobrana pomyślnie' });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });
     }

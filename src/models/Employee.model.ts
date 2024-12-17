@@ -40,8 +40,8 @@ const schema = new mongoose.Schema(
       third: {
         type: Number,
         required: true,
-      }
-    }
+      },
+    },
   },
   {
     timestamps: true,
@@ -60,6 +60,6 @@ export const zodSchema = z.object({
   overtime: z.object({
     first: z.number().min(0).max(10),
     second: z.number().min(0).max(10),
-    third: z.number().min(0).max(10)
-  })
+    third: z.number().min(0).max(10),
+  }),
 });

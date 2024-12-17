@@ -3,17 +3,12 @@ import * as z from 'zod';
 
 const transportSchema = new mongoose.Schema(
   {
-    vehicleDetails: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Vehicle',
-        },
-      ],   
-    driver: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Employee',
-      required: true,
-    },
+    vehicles: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vehicle',
+      },
+    ],
     event: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Event',
@@ -35,13 +30,13 @@ const transportSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    notes: {
+    phoneNumber: {
       type: String,
       required: false,
     },
-    status: {
+    notes: {
       type: String,
-      required: true,
+      required: false,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -56,17 +51,12 @@ const transportSchema = new mongoose.Schema(
 export default mongoose.model('Transport', transportSchema);
 
 export const zodSchema = z.object({
-  vehicleType: z.string().min(3).max(64),
-  vehicleDetails: z.object({
-    brand: z.string().min(3).max(64),
-    model: z.string().min(3).max(64),
-    registrationNumber: z.string().min(3).max(64),
-  }),
-  driver: z.string(),
+  vehicles: z.array(z.string()).min(1),
   event: z.string(),
   departureTime: z.string().datetime(),
   arrivalTime: z.string().datetime().optional().nullable(),
   departureLocation: z.string().min(3).max(64),
   destinationLocation: z.string().min(3).max(64),
+  phoneNumber: z.string().optional(),
   notes: z.string().max(256).optional(),
 });
