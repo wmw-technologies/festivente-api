@@ -3,7 +3,6 @@ import { StatusCodes } from 'http-status-codes';
 import Rental from '../models/Rental.model';
 import Device from '../models/Device.model';
 import Service from '../models/Service.model';
-import { Types } from 'mongoose';
 
 export default class RentalController {
   static async list(req: Request, res: Response): Promise<void> {
@@ -23,7 +22,7 @@ export default class RentalController {
         .sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
 
       response.forEach((item) => {
-        const status = item.rentalDate > new Date() ? 'Scheduled' : item.returnDate > new Date() ? 'In Progress' : 'Completed';
+        const status = item.rentalDate > new Date() ? 'Scheduled' : item.returnDate > new Date() ? 'In Progress' : item.isPaid ? 'Completed Paid' : 'Complated Not Paid';
         item.set('status', status, { strict: false });
       });
 
@@ -129,6 +128,18 @@ export default class RentalController {
         return;
       }
 
+      const status = rental.rentalDate > new Date() ? 'Scheduled' : rental.returnDate > new Date() ? 'In Progress' : 'Completed';
+
+      if (status === 'Completed') {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować zakończonego wypożyczenia' });
+        return;
+      }
+
+      if (status === 'In Progress' && new Date(rentalDate) < new Date()) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować wypożyczenia w trakcie trwania' });
+        return;
+      }
+
       if (new Date(rentalDate) > new Date(returnDate)) {
         res.status(StatusCodes.BAD_REQUEST).json({
           message: 'Data rozpoczęcia nie może być późniejsza niż data zakończenia',
@@ -159,18 +170,6 @@ export default class RentalController {
         res
           .status(StatusCodes.BAD_REQUEST)
           .json({ message: 'Data zakończenia nie może być wcześniejsza niż dzisiejsza data', errors: { returnDate: 'Data zakończenia nie może być wcześniejsza niż dzisiejsza data' } });
-      }
-
-      const status = rental.rentalDate > new Date() ? 'Scheduled' : rental.returnDate > new Date() ? 'In Progress' : 'Completed';
-
-      if (status === 'Completed') {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować zakończonego wypożyczenia' });
-        return;
-      }
-
-      if (status === 'In Progress' && new Date(rentalDate) < new Date()) {
-        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować wypożyczenia w trakcie trwania' });
-        return;
       }
 
 
