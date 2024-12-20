@@ -18,6 +18,11 @@ export default class WarehouseController {
         }
       ).sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
 
+      response.forEach((item) => {
+        item.set('devicesInRental', 0, { strict: false });
+        item.set('devicesInService', 0, { strict: false });
+      });
+
       res.status(StatusCodes.OK).json({
         data: {
           items: response,

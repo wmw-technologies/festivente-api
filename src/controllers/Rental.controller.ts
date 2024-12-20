@@ -112,7 +112,7 @@ export default class RentalController {
         return;
       }
       
-      const status = rental.rentalDate > new Date() ? 'Scheduled' : rental.returnDate > new Date() ? 'In Progress' : 'Completed';
+      const status = rental.rentalDate > new Date() ? 'Scheduled' : rental.returnDate > new Date() ? 'In Progress' : rental.isPaid ? 'Completed Paid' : 'Complated Not Paid';
       rental.set('status', status, { strict: false });
 
       res.status(StatusCodes.OK).json({ data: rental, message: 'Wypożyczenie pobrane pomyślnie' });
@@ -124,7 +124,7 @@ export default class RentalController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { clientName, clientCity, clientStreet, clientPostCode, clientPhone, clientEmail, rentalDate, returnDate, devices, inTotal, notes, paymentForm, isPaid, discount } = req.body;
+      const { clientName, clientCity, clientStreet, clientPostCode, clientPhone, clientEmail, rentalDate, returnDate, devices, inTotal, notes, paymentForm, discount } = req.body;
 
       const rental = await Rental.findById(id);
       if (!rental) {
@@ -132,9 +132,9 @@ export default class RentalController {
         return;
       }
 
-      const status = rental.rentalDate > new Date() ? 'Scheduled' : rental.returnDate > new Date() ? 'In Progress' : 'Completed';
+      const status = rental.rentalDate > new Date() ? 'Scheduled' : rental.returnDate > new Date() ? 'In Progress' : rental.isPaid ? 'Completed Paid' : 'Complated Not Paid';
 
-      if (status === 'Completed') {
+      if (status === 'Completed Paid' || status === 'Complated Not Paid') {
         res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować zakończonego wypożyczenia' });
         return;
       }
@@ -189,7 +189,6 @@ export default class RentalController {
       rental.notes = notes;
       rental.devices = devices;
       rental.paymentForm = paymentForm;
-      rental.isPaid = isPaid;
       rental.discount = discount;
 
       const response = await rental.save();
@@ -202,10 +201,7 @@ export default class RentalController {
 
   static async availableDevices(req: Request, res: Response): Promise<void> {
     try {
-      console.log("hereeee");
       const { rentalDate, returnDate } = req.query;
-
-      console.log("rentalDate", rentalDate);
 
       const rentals = await Rental.find({
         $or: [
@@ -275,8 +271,6 @@ export default class RentalController {
 
       const response = await rental.save();
 
-      console.log("response", response);
-      
       res.status(StatusCodes.OK).json({ data: response, message: 'Status wypożyczenia zmieniony na opłacone' });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });

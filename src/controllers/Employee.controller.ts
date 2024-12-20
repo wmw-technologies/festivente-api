@@ -21,7 +21,7 @@ export default class EmployeeController {
           items: response,
           totalRows,
         },
-        message: 'Udało się pobrać dane',
+        message: 'Lista pracowników została pobrana',
       });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
@@ -71,20 +71,20 @@ export default class EmployeeController {
       const employee = await Employee.findById(id);
 
       if (!employee) {
-        res.status(400).json({ message: 'Employee does not exist' });
+        res.status(400).json({ message: 'Pracownik nie istnieje' });
         return;
       }
 
       const existingEmail = await Employee.findOne({ email });
 
       if (existingEmail && existingEmail._id.toString() !== id) {
-        res.status(400).json({ message: 'Employee with this email already exists', errors: { email: 'Employee with this email already exists' } });
+        res.status(400).json({ message: 'Pracownik z takim emailem już istnieje', errors: { email: 'Pracownik z takim emailem już istnieje' } });
         return;
       }
 
       const updatedItem = await Employee.findByIdAndUpdate(id, { firstName, lastName, email, phone, position, dailyRate, overtime }, { new: true });
 
-      res.status(StatusCodes.OK).json({ message: 'Employee updated successfully', data: updatedItem });
+      res.status(StatusCodes.OK).json({ message: 'Pracownik zaktualizowany', data: updatedItem });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }

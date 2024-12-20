@@ -2,6 +2,16 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import Event from '../models/Event.model';
 
+function areDatesEqual(date1: any, date2: any) {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+
+  d1.setHours(0, 0, 0, 0);
+  d2.setHours(0, 0, 0, 0);
+
+  return d1.getTime() === d2.getTime();
+}
+
 export default class EventController {
   static async list(req: Request, res: Response): Promise<void> {
     try {
@@ -17,6 +27,11 @@ export default class EventController {
       )
         .populate('assignedEmployees')
         .sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
+      response.forEach((item) => {
+        const status = areDatesEqual(item.date, new Date()) ? 'Pending' : item.date > new Date() ? 'Confirmed' : 'Completed';
+
+        item.set('status', status, { strict: false });
+      });
 
       res.status(StatusCodes.OK).json({
         data: {
@@ -32,7 +47,7 @@ export default class EventController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { eventName, clientName, clientEmail, clientPhone, date, description, location, budget, assignedEmployees, estimatedHours, actualHours, notes } = req.body;
+      const { eventName, clientName, clientEmail, clientPhone, date, description, location, budget, assignedEmployees, estimatedHours, actualHours, notes, city } = req.body;
 
       const existingEventName = await Event.findOne({ eventName });
       if (existingEventName) {
@@ -54,7 +69,7 @@ export default class EventController {
         estimatedHours,
         actualHours,
         notes,
-        status: 'Pending',
+        city,
         createdBy: userId,
       });
 
@@ -75,6 +90,10 @@ export default class EventController {
         return;
       }
 
+      const status = areDatesEqual(item.date, new Date()) ? 'Pending' : item.date > new Date() ? 'Confirmed' : 'Completed';
+
+      item.set('status', status, { strict: false });
+
       res.status(StatusCodes.OK).json({ data: item, message: 'Event item retrieved successfully' });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
@@ -84,11 +103,23 @@ export default class EventController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { eventName, clientName, clientEmail, clientPhone, date, description, location, budget, assignedEmployees, estimatedHours, actualHours, notes } = req.body;
+      const { eventName, clientName, clientEmail, clientPhone, date, description, location, budget, assignedEmployees, estimatedHours, actualHours, notes, city } = req.body;
 
       const existingEvent = await Event.findById(id);
       if (!existingEvent) {
         res.status(StatusCodes.NOT_FOUND).json({ message: 'Wydarzenie nie istnieje' });
+        return;
+      }
+
+      const status = areDatesEqual(existingEvent.date, new Date()) ? 'Pending' : existingEvent.date > new Date() ? 'Confirmed' : 'Completed';
+
+      if (status === 'Pending') {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować trwającego wydarzenia' });
+        return;
+      }
+
+      if (status === 'Completed') {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować zakończonego wydarzenia' });
         return;
       }
 
@@ -113,6 +144,7 @@ export default class EventController {
           estimatedHours,
           actualHours,
           notes,
+          city,
         },
         { new: true }
       );

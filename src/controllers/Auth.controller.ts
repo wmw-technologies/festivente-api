@@ -31,7 +31,7 @@ export default class AuthController {
         expiresIn: '7d',
       });
 
-      res.status(200).json({ message: 'Udało się zalogować', data: { access_token, refresh_token, expires_in: 3600 } });
+      res.status(200).json({ message: 'Logowanie pomyślne', data: { access_token, refresh_token, expires_in: 3600 } });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }

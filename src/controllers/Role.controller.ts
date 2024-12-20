@@ -21,7 +21,7 @@ export default class RoleController {
           items: response,
           totalRows,
         },
-        message: 'Udało się pobrać listę użytkowników :)',
+        message: 'Lista użytkowników została pobrana',
       });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
@@ -40,7 +40,7 @@ export default class RoleController {
 
       const response = await Role.create({ name, permissions });
 
-      res.status(201).json({ message: 'Udało się stworzyć nową rolę', data: response });
+      res.status(201).json({ message: 'Rola została stworzona', data: response });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
@@ -70,7 +70,7 @@ export default class RoleController {
       const { id } = req.params;
       const response = await Role.findById(id);
 
-      res.status(200).json({ message: 'Udało się pobrać rolę', data: response });
+      res.status(200).json({ message: 'Rola została pobrana', data: response });
     } catch (err) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }

@@ -62,8 +62,6 @@ export default class TransportController {
         createdBy: userId,
       });
 
-      console.log("newTransport", newTransport)
-
       const response = await newTransport.save();
       res.status(StatusCodes.CREATED).json({ message: 'Wydarzenie zostało dodane', data: response });
     } catch (err) {
@@ -99,6 +97,18 @@ export default class TransportController {
       const existingTransport = await Transport.findById(id);
       if (!existingTransport) {
         res.status(StatusCodes.NOT_FOUND).json({ message: 'Transport nie istnieje' });
+        return;
+      }
+
+      const status = existingTransport.departureTime > new Date() ? 'Scheduled' : existingTransport.arrivalTime! > new Date() ? 'In Progress' : 'Completed'; 
+
+      if (status === 'Completed') {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować zakończonego transportu' });
+        return;
+      }
+
+      if (status === 'In Progress') {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować transportu w trakcie trwania' });
         return;
       }
 
