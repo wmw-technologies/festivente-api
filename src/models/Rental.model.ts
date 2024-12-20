@@ -45,7 +45,7 @@ const rentalSchema = new mongoose.Schema(
     },
     isPaid: {
       type: Boolean,
-      required: true,
+      default: false,
     },
     discount: {
       type: Number,
@@ -89,7 +89,6 @@ export const zodSchema = z.object({
   rentalDate: z.string().datetime(),
   returnDate: z.string().datetime(),
   paymentForm: z.string({ message: 'Wprowadź forme płatności' }).min(1),
-  isPaid: z.boolean(),
   devices: z.array(z.string()).min(1, 'W wypożyczeniu musi być przynajmniej jedno urządzenie'),
   inTotal: z
     .number()

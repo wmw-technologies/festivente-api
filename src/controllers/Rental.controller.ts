@@ -40,7 +40,7 @@ export default class RentalController {
 
   static async create(req: Request, res: Response): Promise<void> {
     try {
-      const { clientName, clientCity, clientStreet, clientPostCode, clientPhone, clientEmail, rentalDate, returnDate, devices, inTotal, notes, paymentForm, isPaid, discount } = req.body;
+      const { clientName, clientCity, clientStreet, clientPostCode, clientPhone, clientEmail, rentalDate, returnDate, devices, inTotal, notes, paymentForm, discount } = req.body;
 
       if (new Date(rentalDate) > new Date(returnDate)) {
         res
@@ -79,7 +79,7 @@ export default class RentalController {
         notes,
         devices,
         paymentForm,
-        isPaid,
+        isPaid: false,
         discount,
         createdBy: userId,
       });
@@ -99,8 +99,12 @@ export default class RentalController {
         populate: {
           path: 'warehouseId',
           model: 'Warehouse',
+          populate: {
+            path: 'createdBy',
+            model: 'User',
+          }
         },
-      });
+      }).populate('createdBy');
 
       
       if (!rental) {
@@ -198,7 +202,10 @@ export default class RentalController {
 
   static async availableDevices(req: Request, res: Response): Promise<void> {
     try {
+      console.log("hereeee");
       const { rentalDate, returnDate } = req.query;
+
+      console.log("rentalDate", rentalDate);
 
       const rentals = await Rental.find({
         $or: [
@@ -234,23 +241,10 @@ export default class RentalController {
         ],
       });
 
-      // let excludedDevices: string[] = [];
-
-      // if (id) {
-      //   const rental = await Rental.findById(id);
-
-      //   if (rental) {
-      //     const rentalDevices = rental.devices.map((device) => device._id.toString());
-
-      //     excludedDevices = [...rentalDevices];
-      //   }
-      // }
-
       const unavailableDevicesRentals = rentals
         .map((rental) => rental.devices)
         .flat()
         .map((device) => device._id)
-        // .filter((device) => !excludedDevices.includes(device._id.toString()));
 
       const unavailableDevicesServices = services
         .map((service) => service.device)
@@ -265,4 +259,29 @@ export default class RentalController {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });
     }
   }
+
+  static async changeStatusToPaid(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const rental = await Rental.findById(id);
+
+      if (!rental) {
+        res.status(StatusCodes.NOT_FOUND).json({ message: 'Wypożyczenie nie zostało znalezione' });
+        return;
+      }
+
+      rental.isPaid = true;
+
+      const response = await rental.save();
+
+      console.log("response", response);
+      
+      res.status(StatusCodes.OK).json({ data: response, message: 'Status wypożyczenia zmieniony na opłacone' });
+    } catch (err) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });
+    }
+  }
+
+
 }

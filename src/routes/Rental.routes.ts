@@ -11,6 +11,7 @@ router.get('/list', authentication, authorization(Permissions.RENTALS.ACCESS), R
 router.post('/create', authentication, authorization(Permissions.RENTALS.ACCESS), validate(zodSchema), RentalController.create);
 router.put('/update/:id', authentication, authorization(Permissions.RENTALS.ACCESS), validate(zodSchema), RentalController.update);
 router.get('/available-devices', authentication, authorization(Permissions.RENTALS.ACCESS), RentalController.availableDevices);
+router.patch('/change-status-to-paid/:id', authentication, authorization(Permissions.RENTALS.ACCESS), RentalController.changeStatusToPaid);
 router.get('/:id', authentication, authorization(Permissions.RENTALS.ACCESS), RentalController.get);
 
 export default router;
