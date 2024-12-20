@@ -47,6 +47,10 @@ const rentalSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
+    discount: {
+      type: Number,
+      required: false,
+    },
     devices: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -84,13 +88,13 @@ export const zodSchema = z.object({
   clientPostCode: z.string().regex(/^\d{2}-\d{3}$/, 'Kod pocztowy musi być w formacie XX-XXX'),
   rentalDate: z.string().datetime(),
   returnDate: z.string().datetime(),
-  paymentForm: z.string().min(1, 'Płatność jest wymagana'),
+  paymentForm: z.string({ message: 'Wprowadź forme płatności' }).min(1),
   isPaid: z.boolean(),
   devices: z.array(z.string()).min(1, 'W wypożyczeniu musi być przynajmniej jedno urządzenie'),
   inTotal: z
     .number()
     .refine((val) => val >= 0, { message: 'Amount must be positive' })
     .refine((val) => val <= 100000, { message: 'Amount must be less than or equal to 100,000 PLN' }),
-  methodOfPayment: z.string().optional().nullable(),
+  discount: z.union([z.number().int().min(0, 'Minimum 0%').max(100, 'Maksimum 100%'), z.nan()]).optional(),
   notes: z.string().optional()
 });

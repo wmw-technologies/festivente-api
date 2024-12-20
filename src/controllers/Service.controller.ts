@@ -120,63 +120,6 @@ class ServiceController {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });
     }
   }
-
-  // static async availableDevices(req: Request, res: Response): Promise<void> {
-  //   try {
-  //     const { id, rentalDate, returnDate } = req.query;
-
-  //     const rentals = await Rental.find({
-  //       $or: [
-  //         {
-  //           rentalDate: {
-  //             $gte: rentalDate,
-  //             $lt: returnDate,
-  //           },
-  //         },
-  //         {
-  //           returnDate: {
-  //             $gt: rentalDate,
-  //             $lte: returnDate,
-  //           },
-  //         },
-  //       ],
-  //     });
-
-  //     const services = await Service.find({
-  //       $or: [
-  //         {
-  //           rentalDate: {
-  //             $gte: rentalDate,
-  //             $lt: returnDate,
-  //           },
-  //         },
-  //         {
-  //           returnDate: {
-  //             $gt: rentalDate,
-  //             $lte: returnDate,
-  //           },
-  //         },
-  //       ],
-  //     });
-
-  //     const unavailableDevicesRentals = rentals
-  //       .map((rental) => rental.devices)
-  //       .flat()
-  //       .map((device) => device._id)
-  //       .filter((device) => device._id !== (id as any));
-  //     const unavailableDevicesServices = services
-  //       .map((service) => service.device)
-  //       .flat()
-  //       .map((device) => device._id);
-  //     const unavailableDevices = [...unavailableDevicesServices, ...unavailableDevicesRentals];
-
-  //     const availableDevices = await Device.find({ _id: { $nin: unavailableDevices } }).populate('warehouseId');
-
-  //     res.status(StatusCodes.OK).json({ data: availableDevices, message: 'Lista dostępnych urządzeń pobrana pomyślnie' });
-  //   } catch (err) {
-  //     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Błąd serwera' });
-  //   }
-  // }
 }
 
 export default ServiceController;

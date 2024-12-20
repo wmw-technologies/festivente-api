@@ -48,12 +48,11 @@ export default class VehicleController {
 
       const existingVehicle = await Vehicle.findOne({ registrationNumber });
       if (existingVehicle) {
-        res.status(StatusCodes.CONFLICT).json({ message: 'Pojazd z takim numerem rejestracyjnym już istnieje' });
+        res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ message: 'Pojazd z takim numerem rejestracyjnym już istnieje', errors: { registrationNumber: 'Pojazd z takim numerem rejestracyjnym już istnieje' } });
         return;
       }
 
       const vehicle = new Vehicle({ brand, model, registrationNumber, pricePerKm, inspectionDate, insuranceDate, description });
-
       const response = await vehicle.save();
 
       res.status(StatusCodes.CREATED).json({
@@ -75,15 +74,13 @@ export default class VehicleController {
         return;
       }
 
-      if (registrationNumber) {
-        const existingVehicle = await Vehicle.findOne({ registrationNumber });
-        if (existingVehicle && existingVehicle._id.toString() !== id) {
-          res.status(StatusCodes.CONFLICT).json({ message: 'Pojazd z takim numerem rejestracyjnym już istnieje' });
-          return;
-        }
-        vehicle.registrationNumber = registrationNumber;
+      const existingVehicle = await Vehicle.findOne({ registrationNumber }).catch((err) => console.log(err));
+      if (existingVehicle && existingVehicle._id.toString() !== id) {
+        res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ message: 'Pojazd z takim numerem rejestracyjnym już istnieje', errors: { registrationNumber: 'Pojazd z takim numerem rejestracyjnym już istnieje' } });
+        return;
       }
 
+      vehicle.registrationNumber = registrationNumber;
       vehicle.brand = brand;
       vehicle.model = model;
       vehicle.pricePerKm = pricePerKm;

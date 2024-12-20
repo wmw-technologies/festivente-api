@@ -62,6 +62,8 @@ export default class TransportController {
         createdBy: userId,
       });
 
+      console.log("newTransport", newTransport)
+
       const response = await newTransport.save();
       res.status(StatusCodes.CREATED).json({ message: 'Wydarzenie zostało dodane', data: response });
     } catch (err) {
