@@ -23,7 +23,7 @@ class ServiceController {
         .sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
 
       response.forEach((item) => {
-        const status = item.returnDate && !item.serviceDate ? 'Accepted' : item.serviceDate! > new Date() ? 'Completed' : 'In Progress';
+        const status = item.returnDate && !item.serviceDate ? 'Accepted' : item.serviceDate! <= new Date() ? 'Completed' : 'In Progress';
         item.set('status', status, { strict: false });
       });
 
@@ -49,7 +49,7 @@ class ServiceController {
         return;
       }
 
-      if (serviceDate && returnDate && (new Date(returnDate) > new Date(serviceDate))) {
+      if (serviceDate && returnDate && new Date(returnDate) > new Date(serviceDate)) {
         res.status(StatusCodes.BAD_REQUEST).json({
           message: 'Data rozpoczęcia nie może być późniejsza niż data zakończenia',
           errors: {
@@ -64,7 +64,30 @@ class ServiceController {
         res.status(StatusCodes.BAD_REQUEST).json({ message: 'Pracownik nie istnieje' });
         return;
       }
-      
+
+      const existingService = await Service.find({
+        $or: [
+          { device: device, serviceDate: null },
+          {
+            device: device,
+            rentalDate: {
+              $gte: serviceDate,
+              $lt: returnDate,
+            },
+          },
+          {
+            serviceDate: {
+              $gt: serviceDate,
+              $lte: returnDate,
+            },
+          },
+        ],
+      });
+
+      if (existingService.length > 0) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: 'Urządzenie jest już w serwisie', errors: { device: 'Urządzenie jest już w serwisie' } });
+        return;
+      }
 
       const service = new Service({ returnDate, serviceDate, repairPrice, servicePerson, device, description });
       const response = await service.save();
@@ -93,7 +116,7 @@ class ServiceController {
         return;
       }
 
-      const status = service.returnDate && !service.serviceDate ? 'Accepted' : service.serviceDate! > new Date() ? 'Completed' : 'In Progress';
+      const status = service.returnDate && !service.serviceDate ? 'Accepted' : service.serviceDate! <= new Date() ? 'Completed' : 'In Progress';
       service.set('status', status, { strict: false });
 
       res.status(StatusCodes.OK).json({ data: service, message: 'Serwis pobrany pomyślnie' });
@@ -113,14 +136,14 @@ class ServiceController {
         return;
       }
 
-      const status = service.returnDate && !service.serviceDate ? 'Accepted' : service.serviceDate! > new Date() ? 'Completed' : 'In Progress';
+      const status = service.returnDate && !service.serviceDate ? 'Accepted' : service.serviceDate! <= new Date() ? 'Completed' : 'In Progress';
 
       if (status === 'Completed') {
         res.status(StatusCodes.BAD_REQUEST).json({ message: 'Nie można edytować zakończonego serwisu' });
         return;
       }
 
-      if (serviceDate && returnDate && (new Date(returnDate) > new Date(serviceDate))) {
+      if (serviceDate && returnDate && new Date(returnDate) > new Date(serviceDate)) {
         res.status(StatusCodes.BAD_REQUEST).json({
           message: 'Data rozpoczęcia nie może być późniejsza niż data zakończenia',
           errors: {
