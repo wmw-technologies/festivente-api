@@ -18,7 +18,13 @@ class ServiceController {
           limit: parseInt(perPage as string),
         }
       )
-        .populate('device')
+        .populate({
+          path: 'device',
+          populate: {
+            path: 'warehouseId',
+            model: 'Warehouse',
+          }
+        })
         .populate('servicePerson')
         .sort({ [sort as string]: order === 'ASC' ? 1 : -1 });
 
