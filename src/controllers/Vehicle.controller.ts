@@ -74,7 +74,7 @@ export default class VehicleController {
         return;
       }
 
-      const existingVehicle = await Vehicle.findOne({ registrationNumber }).catch((err) => console.log(err));
+      const existingVehicle = await Vehicle.findOne({ registrationNumber });
       if (existingVehicle && existingVehicle._id.toString() !== id) {
         res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ message: 'Pojazd z takim numerem rejestracyjnym już istnieje', errors: { registrationNumber: 'Pojazd z takim numerem rejestracyjnym już istnieje' } });
         return;
